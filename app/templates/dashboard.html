@@ -4,14 +4,76 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard</title>
+    <!-- Add Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body>
-    <h2>Welcome, {{ user.username }}!</h2>
-    <p>Your email: {{ user.email }}</p>
-    <p>Your token balance: {{ user.token }}</p>
-    
-    <form action="/auth/logout" method="post">
-        <button type="submit">Logout</button>
-    </form>
+<body class="bg-gray-100 font-sans antialiased">
+
+    <!-- Navbar -->
+    <nav class="bg-blue-600 p-4 shadow-md">
+        <div class="max-w-6xl mx-auto flex items-center justify-between">
+            <div class="text-white font-semibold text-xl">
+                Welcome, {{ user.username }}!
+            </div>
+            <div class="text-white space-x-4 text-sm">
+                <span>Your email: <strong>{{ user.email }}</strong></span>
+                <span>Your Total Score: <strong>{{ user.score }}</strong></span>
+                <span>Your Token Balance: <strong>{{ user.token }}</strong></span>
+            </div>
+            <div>
+                <form action="/auth/logout" method="post">
+                    <button type="submit" class="px-6 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-400">Logout</button>
+                </form>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="max-w-4xl mx-auto p-6 bg-white rounded-lg shadow-md mt-10">
+        <h2 class="text-3xl font-semibold text-gray-800">Quiz Time!</h2>
+        <form action="/auth/submit-quiz" method="post" class="space-y-6 mt-6">
+            {% if questions %}
+                {% for q in questions %}
+                    <div class="bg-gray-50 p-4 rounded-lg shadow-sm">
+                        <p class="text-xl font-medium text-gray-800 mb-2">{{ q.question_text }}</p>
+                        <p class="text-sm text-gray-500 mb-3"><em>Category: {{ q.category }} | Difficulty: {{ q.difficulty }}</em></p>
+
+                        <!-- Options -->
+                        <div class="space-y-2">
+                            <label class="block">
+                                <input type="radio" name="q{{ q.id }}" value="a" class="mr-2 leading-tight">
+                                <span class="text-gray-700">{{ q.option_a }}</span>
+                            </label>
+                            <label class="block">
+                                <input type="radio" name="q{{ q.id }}" value="b" class="mr-2 leading-tight">
+                                <span class="text-gray-700">{{ q.option_b }}</span>
+                            </label>
+                            
+                            {% if q.option_c %}
+                                <label class="block">
+                                    <input type="radio" name="q{{ q.id }}" value="c" class="mr-2 leading-tight">
+                                    <span class="text-gray-700">{{ q.option_c }}</span>
+                                </label>
+                            {% endif %}
+
+                            {% if q.option_d %}
+                                <label class="block">
+                                    <input type="radio" name="q{{ q.id }}" value="d" class="mr-2 leading-tight">
+                                    <span class="text-gray-700">{{ q.option_d }}</span>
+                                </label>
+                            {% endif %}
+                        </div>
+                    </div>
+                {% endfor %}
+            {% else %}
+                <p class="text-lg text-red-500">No quiz questions available.</p>
+            {% endif %}
+            
+            <div class="flex justify-center">
+                <button type="submit" class="px-6 py-2 text-white bg-blue-600 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-400">Submit Quiz</button>
+            </div>
+        </form>
+    </div>
+
 </body>
 </html>
