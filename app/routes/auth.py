@@ -1,3 +1,4 @@
+from datetime import datetime
 from fastapi import APIRouter, Depends, Request, Form
 from sqlalchemy.orm import Session
 from sqlalchemy.sql.expression import func
@@ -7,7 +8,7 @@ from app.utils import verify_password, store_questions_in_db
 from app.schemas import UserCreate
 from fastapi.responses import RedirectResponse
 from fastapi.templating import Jinja2Templates
-from app.models import User, Question
+from app.models import User, Question, QuizAttempt
 
 router = APIRouter()
 templates = Jinja2Templates(directory="app/templates")
@@ -78,37 +79,6 @@ def logout():
     return response
 
 
-# @router.post("/submit-quiz")
-# async def submit_quiz(
-#     request: Request,
-#     db: Session = Depends(get_db)
-# ):
-#     user_id = request.cookies.get("user_id")
-
-#     if not user_id:
-#         return RedirectResponse(url="/auth/login", status_code=303)
-
-#     user = db.query(User).filter(User.id == int(user_id)).first()
-#     if not user:
-#         return RedirectResponse(url="/auth/login", status_code=303)
-
-#     # Await form data retrieval
-#     form_data = await request.form()
-
-#     questions = db.query(Question).all()
-#     score = 0
-
-#     for q in questions:
-#         user_answer = form_data.get(f"q{q.id}")  # Retrieve user's answer
-#         if user_answer and user_answer == q.correct_option:
-#             score += 1  # Increase score for correct answers
-
-#     user.score += score  # Update user's score
-#     db.commit()
-
-#     return RedirectResponse(url="/auth/dashboard", status_code=303)
-
-
 @router.post("/submit-quiz")
 async def submit_quiz(
     request: Request,
@@ -125,17 +95,17 @@ async def submit_quiz(
 
     # Retrieve form data
     form_data = await request.form()
-    # print("Form Data Received:", form_data)  
 
-    # Extract the question IDs (remove 'q' prefix) from the form data
+    # Generate a unique session ID (e.g., current timestamp)
+    session_id = int(datetime.utcnow().timestamp())
+
+    # Extract the question IDs
     question_ids = [int(key[1:]) for key in form_data.keys() if key.startswith('q')]
-
-    # questions = db.query(Question).all()
     questions = db.query(Question).filter(Question.id.in_(question_ids)).all()
     score = 0
 
     for q in questions:
-        user_answer_key = form_data.get(f"q{q.id}")  # Get user's selected option ('a', 'b', 'c', 'd')
+        user_answer_key = form_data.get(f"q{q.id}")  
         
         # Mapping user selection to actual answer
         option_mapping = {
@@ -144,22 +114,55 @@ async def submit_quiz(
             "c": q.option_c,
             "d": q.option_d
         }
+        user_answer = option_mapping.get(user_answer_key)  
 
-        user_answer = option_mapping.get(user_answer_key)  # Convert 'a' -> 'actual full answer'
+        # Check if correct
+        is_correct = user_answer == q.correct_option
+        if is_correct:
+            score += 1  
 
-        # print(f"Q{q.id}: User Selected = {user_answer_key} ({user_answer}), Correct Answer = {q.correct_option}")  
+        # Store the attempt
+        attempt = QuizAttempt(
+            user_id=user.id,
+            question_id=q.id,
+            user_answer=user_answer,
+            correct_answer=q.correct_option,
+            is_correct=is_correct,
+            session_id=session_id
+        )
+        db.add(attempt)
 
-        if user_answer and user_answer == q.correct_option:
-            # print(f"Correct Answer for Q{q.id}!")  
-            score += 1  # Increase score for correct answers
-
-    # print(f"User Score Before Update: {user.score}, New Score: {score}")
-
-    # Update user's score
     user.score += score
     db.commit()
 
     total_attempted = len(questions)
 
-    # Redirect to results page with necessary data
-    return templates.TemplateResponse("result.html", {"request": request, "score": score, "total_attempted": total_attempted})
+    return templates.TemplateResponse("result.html", {
+        "request": request,
+        "score": score,
+        "total_attempted": total_attempted,
+        "session_id": session_id  # Pass session_id for review
+    })
+
+
+@router.get("/review-quiz")
+async def review_quiz(request: Request, session_id: int, db: Session = Depends(get_db)):
+    user_id = request.cookies.get("user_id")
+    if not user_id:
+        return RedirectResponse(url="/auth/login", status_code=303)
+
+    user = db.query(User).filter(User.id == int(user_id)).first()
+    if not user:
+        return RedirectResponse(url="/auth/login", status_code=303)
+
+    # Fetch only the latest session
+    latest_attempts = (
+        db.query(QuizAttempt)
+        .filter(QuizAttempt.user_id == user.id, QuizAttempt.session_id == session_id)
+        .all()
+    )
+
+    return templates.TemplateResponse("review.html", {
+        "request": request,
+        "quiz_attempts": latest_attempts
+    })

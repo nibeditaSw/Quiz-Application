@@ -1,64 +1,26 @@
-<!-- <!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Quiz Results</title>
-
-</head>
-<body>
-    <div class="container">
-        <h1>Quiz Results</h1>
-        <p><strong>Questions Attempted:</strong> {{ total_attempted }}</p>
-        <p><strong>Your Score:</strong> {{ score }}</p>
-
-        {% if score == total_attempted %}
-            <p class="success">Congratulations! You got all answers correct!</p>
-        {% elif score >= total_attempted // 2 %}
-            <p class="average">Good job! Keep practicing to improve.</p>
-        {% else %}
-            <p class="fail">Don't worry! Try again to score better.</p>
-        {% endif %}
-
-        <a href="/auth/dashboard" class="btn">Back to Dashboard</a>
-    </div>
-</body>
-</html> -->
-
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Quiz Results</title>
+    <title>Quiz Result</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="bg-gray-100 font-sans antialiased">
-
-    <!-- Container for Results -->
-    <div class="max-w-4xl mx-auto p-8 bg-white rounded-lg shadow-md mt-10">
-        <h1 class="text-3xl font-semibold text-center text-gray-800 mb-6">Quiz Results</h1>
-
-        <p class="text-lg text-gray-700"><strong>Questions Attempted:</strong> <span class="font-medium">{{ total_attempted }}</span></p>
-        <p class="text-lg text-gray-700"><strong>Your Score:</strong> <span class="font-medium">{{ score }}</span></p>
-
-        <!-- Conditional Message -->
-        {% if total_attempted == score and score != 0 %}
-            <p class="mt-4 text-xl text-green-600 font-semibold">🎉 Congratulations! You got all answers correct!</p>
-        {% elif total_attempted > 0 and (score / total_attempted) >= 0.60 %}
-            <p class="mt-4 text-xl text-yellow-600 font-semibold">👍 Good job! Keep practicing to improve.</p>
-        {% elif score == 0 %}
-            <p class="mt-4 text-xl text-red-600 font-semibold">😔 Don't worry! Try again to score better.</p>
-        {% else %}
-            <p class="mt-4 text-xl text-red-600 font-semibold">😔 Don't worry! Try again to score better.</p>
-        {% endif %}
-
-        <!-- Back to Dashboard Button -->
-        <div class="mt-6 flex justify-center">
-            <a href="/auth/dashboard" class="px-6 py-2 text-white bg-blue-600 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-400 transition">Back to Dashboard</a>
+<body class="bg-gray-100 flex items-center justify-center min-h-screen">
+    <div class="bg-white shadow-lg rounded-lg p-6 text-center w-96">
+        <h2 class="text-2xl font-bold text-gray-800">Quiz Completed!</h2>
+        <p class="text-lg text-gray-600 mt-2">Your Score: <span class="font-bold text-blue-600">{{ score }}</span> / <span class="text-gray-800">{{ total_attempted }}</span></p>
+        
+        <div class="mt-6 flex flex-col gap-4">
+            <a href="/auth/review-quiz?session_id={{ session_id }}">
+                <button class="w-full bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg transition duration-300">Review Quiz</button>
+            </a>
+            <a href="/auth/dashboard">
+                <button class="w-full bg-green-500 hover:bg-green-600 text-white font-semibold py-2 px-4 rounded-lg transition duration-300">Back to Dashboard</button>
+            </a>
         </div>
     </div>
-
 </body>
 </html>
+
+
