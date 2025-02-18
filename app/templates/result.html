@@ -44,10 +44,12 @@
         <p class="text-lg text-gray-700"><strong>Your Score:</strong> <span class="font-medium">{{ score }}</span></p>
 
         <!-- Conditional Message -->
-        {% if score == total_attempted %}
+        {% if total_attempted == score and score != 0 %}
             <p class="mt-4 text-xl text-green-600 font-semibold">🎉 Congratulations! You got all answers correct!</p>
-        {% elif score >= total_attempted // 2 %}
+        {% elif total_attempted > 0 and (score / total_attempted) >= 0.60 %}
             <p class="mt-4 text-xl text-yellow-600 font-semibold">👍 Good job! Keep practicing to improve.</p>
+        {% elif score == 0 %}
+            <p class="mt-4 text-xl text-red-600 font-semibold">😔 Don't worry! Try again to score better.</p>
         {% else %}
             <p class="mt-4 text-xl text-red-600 font-semibold">😔 Don't worry! Try again to score better.</p>
         {% endif %}
