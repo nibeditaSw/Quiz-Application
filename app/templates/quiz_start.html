@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Start Quiz</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 font-sans antialiased">
+
+    <nav class="bg-blue-600 p-4 shadow-md">
+        <div class="max-w-6xl mx-auto flex items-center justify-between">
+            <div class="text-white font-semibold text-xl">
+                Welcome, {{ user.username }}!
+            </div>
+            <div class="text-white space-x-4 text-sm">
+                <span>Your email: <strong>{{ user.email }}</strong></span>
+                <span>Your Total Score: <strong>{{ user.score }}</strong></span>
+                <span>Your Token Balance: <strong>{{ user.token }}</strong></span>
+            </div>
+            <div>
+                <form action="/auth/logout" method="post">
+                    <button type="submit" class="px-6 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-400">Logout</button>
+                </form>
+            </div>
+        </div>
+    </nav>
+
+    <div class="max-w-xl mx-auto p-6 bg-white rounded-lg shadow-md mt-10">
+        <h2 class="text-2xl font-semibold text-gray-800">Choose Quiz Category and Difficulty</h2>
+        
+        <form action="/auth/start-quiz" method="post" class="space-y-6 mt-6">
+            <div class="space-y-2">
+                <label for="category" class="text-lg font-medium text-gray-800">Category</label>
+                <select name="category" id="category" class="block w-full p-2 border rounded-lg">
+                    {% for category in categories %}
+                        <option value="{{ category[0] }}">{{ category[0] }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            
+            <div class="space-y-2">
+                <label for="difficulty" class="text-lg font-medium text-gray-800">Difficulty</label>
+                <select name="difficulty" id="difficulty" class="block w-full p-2 border rounded-lg">
+                    {% for diff in difficulties %}
+                        <option value="{{ diff }}">{{ diff | capitalize }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            
+            <div class="flex justify-center">
+                <button type="submit" class="px-6 py-2 text-white bg-blue-600 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-400">Start Quiz</button>
+            </div>
+        </form>
+    </div>
+
+</body>
+</html>

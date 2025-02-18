@@ -24,47 +24,81 @@ def verify_password(plain_password: str, hashed_password: str) -> bool:
 #     return []
 
 
-# Store Questions in Database
+
 def store_questions_in_db(db: Session):
-    url = "https://opentdb.com/api.php?amount=10&category=18&difficulty=easy"
-    response = requests.get(url).json()
+    # URLs for fetching questions
+    urls = [
+        "https://opentdb.com/api.php?amount=50&category=18&type=multiple",
+        "https://opentdb.com/api.php?amount=50&category=9&type=multiple",
+        "https://opentdb.com/api.php?amount=50&category=23&type=multiple"
+    ]
 
-    if isinstance(response, dict) and 'results' in response:
-        questions = response['results']
+    # Delete all existing questions from the database before adding new ones
+    # db.query(Question).delete()
 
-        for item in questions:
-            question_text = item['question']
-            correct_answer = item['correct_answer']
-            incorrect_answers = item['incorrect_answers']
-            category = item.get('category', 'General Knowledge')  # Default category if not present
-            difficulty = item.get('difficulty', 'easy')  # Default difficulty if not present
+    # Iterate over each URL and fetch the questions
+    for url in urls:
+        print(f"Fetching questions from: {url}")
+        try:
+            response = requests.get(url).json()
 
-            # Shuffle answers
-            all_answers = [correct_answer] + [incorrect_answers]
-            random.shuffle(all_answers)
+            # Print the entire response to understand the structure
+            print(f"Response from URL {url}: {response}")
 
-            # Ensure answers list contains 4 options
-            if len(all_answers) < 4:
+            # Check for a valid response and handle empty results
+            if response.get("response_code") == 5:
+                print(f"Error: No questions found for URL: {url}")
                 continue
 
-            option_a = all_answers[0]
-            option_b = all_answers[1]
-            option_c = all_answers[2] if len(all_answers) > 2 else None
-            option_d = all_answers[3] if len(all_answers) > 3 else None
+            # Check if the response contains 'results' and is valid
+            if isinstance(response, dict) and 'results' in response:
+                questions = response['results']
+                print(f"Found {len(questions)} questions from URL: {url}")
 
-            # Ensure category, difficulty, and all options are provided when creating the Question
-            new_question = Question(
-                category=category,
-                difficulty=difficulty,
-                question_text=question_text,
-                option_a=option_a,
-                option_b=option_b,
-                option_c=option_c,
-                option_d=option_d,
-                correct_option=correct_answer
-            )
-            db.add(new_question)
+                # Loop through the questions and insert into the database
+                for item in questions:
+                    question_text = item['question']
+                    correct_answer = item['correct_answer']
+                    incorrect_answers = item['incorrect_answers']
+                    category = item.get('category', 'General Knowledge')
+                    difficulty = item.get('difficulty', 'easy')
 
-        db.commit()
-    else:
-        print("Error: Response format is incorrect or 'results' key not found.")
+                    # Shuffle answers
+                    all_answers = [correct_answer] + incorrect_answers
+                    random.shuffle(all_answers)
+
+                    # Ensure answers list contains 4 options
+                    if len(all_answers) < 4:
+                        continue
+
+                    option_a = all_answers[0]
+                    option_b = all_answers[1]
+                    option_c = all_answers[2] if len(all_answers) > 2 else None
+                    option_d = all_answers[3] if len(all_answers) > 3 else None
+
+                    # Add new question to the database
+                    new_question = Question(
+                        category=category,
+                        difficulty=difficulty,
+                        question_text=question_text,
+                        option_a=option_a,
+                        option_b=option_b,
+                        option_c=option_c,
+                        option_d=option_d,
+                        correct_option=correct_answer
+                    )
+                    db.add(new_question)
+
+                # Commit after processing each URL's questions
+                db.commit()
+
+                print(f"Successfully added {len(questions)} questions from URL: {url}")
+            else:
+                print(f"Error: No 'results' key found in the response for URL: {url}")
+
+        except requests.exceptions.RequestException as e:
+            print(f"Request error for URL {url}: {e}")
+        except Exception as e:
+            print(f"An unexpected error occurred for URL {url}: {e}")
+
+    print("All questions from all URLs have been processed and stored.")

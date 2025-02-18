@@ -2,7 +2,7 @@ from datetime import datetime
 from fastapi import APIRouter, Depends, Request, Form
 from sqlalchemy.orm import Session
 from sqlalchemy.sql.expression import func
-from app.database import SessionLocal
+from app.database import SessionLocal, get_db
 from app.crud import create_user, get_user_by_username
 from app.utils import verify_password, store_questions_in_db
 from app.schemas import UserCreate
@@ -13,12 +13,6 @@ from app.models import User, Question, QuizAttempt
 router = APIRouter()
 templates = Jinja2Templates(directory="app/templates")
 
-def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
 
 @router.get("/register")
 def register_page(request: Request):
@@ -43,33 +37,46 @@ def login_user(request: Request, username: str = Form(...), password: str = Form
     user = get_user_by_username(db, username)
     if not user or not verify_password(password, user.hashed_password):
         return templates.TemplateResponse("login.html", {"request": request, "error": "Invalid credentials"})
-    response = RedirectResponse(url="/auth/dashboard", status_code=303)
+    response = RedirectResponse(url="/auth/start-quiz", status_code=303)
     response.set_cookie(key="user_id", value=str(user.id))  # Set user ID in cookies
     return response
 
 
+
 @router.get("/dashboard")
-def dashboard(request: Request, db: Session = Depends(get_db)):
+def dashboard(request: Request, db: Session = Depends(get_db), category: str = None, difficulty: str = None):
     user_id = request.cookies.get("user_id")
     
     if not user_id:
-        return RedirectResponse(url="/auth/login", status_code=303)  # Redirect if not logged in
+        return RedirectResponse(url="/auth/login", status_code=303)
     
     user = db.query(User).filter(User.id == int(user_id)).first()
     if not user:
         return RedirectResponse(url="/auth/login", status_code=303)
-    
+
     # Check if questions exist in DB; if not, fetch and store them
-    if db.query(Question).count() == 0:
-        store_questions_in_db(db)
+    # if db.query(Question).count() == 0:
+    #     store_questions_in_db(db)
+    
+    # Build the query for fetching questions
+    query = db.query(Question)
+    
+    # Apply filters based on category and difficulty if provided
+    if category:
+        query = query.filter(Question.category == category)
+    if difficulty:
+        query = query.filter(Question.difficulty == difficulty)
 
-    # Retrieve 5 random questions from DB
-    questions = db.query(Question).order_by(func.random()).limit(5).all()
+    # Limit to 5 questions
+    questions = query.order_by(func.random()).limit(5).all()
 
-    # # Fetch all quiz questions
-    # questions = db.query(Question).all()
-    print(f"Loaded {len(questions)} questions from DB")
-    return templates.TemplateResponse("dashboard.html", {"request": request, "user": user, "questions": questions})
+    # Render the template with the questions
+    return templates.TemplateResponse("dashboard.html", {
+        "request": request,
+        "user": user,
+        "questions": questions
+    })
+
 
 
 @router.post("/logout")
@@ -166,3 +173,48 @@ async def review_quiz(request: Request, session_id: int, db: Session = Depends(g
         "request": request,
         "quiz_attempts": latest_attempts
     })
+
+
+@router.get("/start-quiz")
+def start_quiz(request: Request, db: Session = Depends(get_db)):
+    user_id = request.cookies.get("user_id")
+    
+    if not user_id:
+        return RedirectResponse(url="/auth/login", status_code=303)  # Redirect if not logged in
+    
+    user = db.query(User).filter(User.id == int(user_id)).first()
+    if not user:
+        return RedirectResponse(url="/auth/login", status_code=303)
+    
+    # Fetch available categories from DB (assuming Question has a category field)
+    categories = db.query(Question.category).distinct().all()
+
+    # Fetch distinct difficulty levels from the DB and extract the values
+    difficulties = [difficulty[0] for difficulty in db.query(Question.difficulty).distinct().all()]
+    
+    return templates.TemplateResponse("quiz_start.html", {
+        "request": request, 
+        "user": user, 
+        "categories": categories,
+        "difficulties": difficulties
+    })
+
+
+@router.post("/start-quiz")
+async def start_quiz_post(request: Request, db: Session = Depends(get_db)):
+    user_id = request.cookies.get("user_id")
+    
+    if not user_id:
+        return RedirectResponse(url="/auth/login", status_code=303)
+    
+    user = db.query(User).filter(User.id == int(user_id)).first()
+    if not user:
+        return RedirectResponse(url="/auth/login", status_code=303)
+    
+    # Retrieve form data (category and difficulty)
+    form_data = await request.form()
+    category = form_data.get("category")
+    difficulty = form_data.get("difficulty")
+
+    # Redirect to the dashboard with the selected category and difficulty
+    return RedirectResponse(url=f"/auth/dashboard?category={category}&difficulty={difficulty}", status_code=303)
