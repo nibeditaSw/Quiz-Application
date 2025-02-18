@@ -192,11 +192,14 @@ def start_quiz(request: Request, db: Session = Depends(get_db)):
     # Fetch distinct difficulty levels from the DB and extract the values
     difficulties = [difficulty[0] for difficulty in db.query(Question.difficulty).distinct().all()]
     
+    top_users = db.query(User).order_by(User.score.desc()).limit(5).all()
+    
     return templates.TemplateResponse("quiz_start.html", {
         "request": request, 
         "user": user, 
         "categories": categories,
-        "difficulties": difficulties
+        "difficulties": difficulties,
+        "top_users": top_users
     })
 
 
