@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Question</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 font-sans antialiased">
+
+    <!-- ✅ Navigation Bar -->
+    <nav class="bg-gray-800 p-4 shadow-md">
+        <div class="max-w-6xl mx-auto flex items-center justify-between">
+            <div class="text-white font-semibold text-xl">
+                Admin Panel
+            </div>
+            <div class="space-x-4">
+                <a href="/admin/admin/home" class="px-4 py-2 text-white hover:bg-gray-700 rounded-lg">Home</a>
+                <a href="/admin/admin/questions" class="px-4 py-2 text-white hover:bg-gray-700 rounded-lg">Question List</a>
+                <a href="/admin/admin" class="px-4 py-2 text-white hover:bg-gray-700 rounded-lg">User List</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- ✅ Form Container -->
+    <div class="max-w-3xl mx-auto mt-10 p-8 bg-white rounded-lg shadow-lg">
+        <h2 class="text-3xl font-bold text-gray-800 mb-6">Create New Question</h2>
+
+        <form action="/admin/admin/create-question" method="post" class="space-y-6">
+            <!-- Question Field -->
+            <div>
+                <label class="block text-gray-700 font-medium">Question</label>
+                <input type="text" name="question_text" required class="w-full mt-2 p-3 border rounded-lg focus:ring focus:ring-blue-200">
+            </div>
+
+            <!-- Multiple Choice Options -->
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-gray-700 font-medium">Option A</label>
+                    <input type="text" name="option_a" required class="w-full mt-2 p-3 border rounded-lg">
+                </div>
+                <div>
+                    <label class="block text-gray-700 font-medium">Option B</label>
+                    <input type="text" name="option_b" required class="w-full mt-2 p-3 border rounded-lg">
+                </div>
+                <div>
+                    <label class="block text-gray-700 font-medium">Option C</label>
+                    <input type="text" name="option_c" required class="w-full mt-2 p-3 border rounded-lg">
+                </div>
+                <div>
+                    <label class="block text-gray-700 font-medium">Option D</label>
+                    <input type="text" name="option_d" required class="w-full mt-2 p-3 border rounded-lg">
+                </div>
+            </div>
+
+            <!-- Correct Answer -->
+            <div>
+                <label class="block text-gray-700 font-medium">Correct Option</label>
+                <select name="correct_option" required class="w-full mt-2 p-3 border rounded-lg">
+                    <option value="A">Option A</option>
+                    <option value="B">Option B</option>
+                    <option value="C">Option C</option>
+                    <option value="D">Option D</option>
+                </select>
+            </div>
+
+            <!-- Category Selection -->
+            <div>
+                <label class="block text-gray-700 font-medium">Category</label>
+                <select name="category" required class="w-full mt-2 p-3 border rounded-lg">
+                    <option value="Film">Film</option>
+                    <option value="Mythology">Mythology</option>
+                </select>
+            </div>
+
+            <!-- Difficulty Selection -->
+            <div>
+                <label class="block text-gray-700 font-medium">Difficulty</label>
+                <select name="difficulty" required class="w-full mt-2 p-3 border rounded-lg">
+                    <option value="Easy">Easy</option>
+                    <option value="Medium">Medium</option>
+                    <option value="Hard">Hard</option>
+                </select>
+            </div>
+
+            <!-- Submit Button -->
+            <div class="flex justify-end">
+                <button type="submit" class="px-6 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition">
+                    Create Question
+                </button>
+            </div>
+        </form>
+    </div>
+
+</body>
+</html>

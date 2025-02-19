@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Questions List</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 font-sans antialiased">
+
+    <!-- ✅ Navigation Bar -->
+    <nav class="bg-gray-800 p-4 shadow-md">
+        <div class="max-w-6xl mx-auto flex items-center justify-between">
+            <div class="text-white font-semibold text-xl">
+                Admin Panel
+            </div>
+            <div class="space-x-4">
+                <a href="/admin/admin/home" class="px-4 py-2 text-white hover:bg-gray-700 rounded-lg">Home</a>
+                <a href="/admin/admin/questions" class="px-4 py-2 text-white hover:bg-gray-700 rounded-lg">Question List</a>
+                <a href="/admin/admin" class="px-4 py-2 text-white hover:bg-gray-700 rounded-lg">User List</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- ✅ Page Content -->
+    <div class="max-w-6xl mx-auto mt-10 p-6 bg-white rounded-lg shadow-lg">
+        <div class="flex justify-between items-center mb-6">
+            <h2 class="text-3xl font-bold text-gray-800">Questions List</h2>
+            <a href="/admin/admin/create-question" class="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition">
+                + Create New Question
+            </a>
+        </div>
+
+        <!-- ✅ Questions Table -->
+        <table class="w-full border-collapse border border-gray-200 shadow-sm">
+            <thead>
+                <tr class="bg-gray-100">
+                    <th class="border border-gray-300 px-4 py-2">ID</th>
+                    <th class="border border-gray-300 px-4 py-2">Question</th>
+                    <th class="border border-gray-300 px-4 py-2">Category</th>
+                    <th class="border border-gray-300 px-4 py-2">Difficulty</th>
+                    <th class="border border-gray-300 px-4 py-2">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for question in questions %}
+                <tr class="text-center">
+                    <td class="border border-gray-300 px-4 py-2">{{ question.id }}</td>
+                    <td class="border border-gray-300 px-4 py-2 text-left">{{ question.question_text }}</td>
+                    <td class="border border-gray-300 px-4 py-2">{{ question.category }}</td>
+                    <td class="border border-gray-300 px-4 py-2">{{ question.difficulty }}</td>
+                    <td class="border border-gray-300 px-4 py-2 flex justify-center space-x-2">
+                        <a href="/admin/admin/edit-question/{{ question.id }}" class="px-3 py-1 bg-blue-500 text-white rounded hover:bg-blue-600">Edit</a>
+                        <form action="/admin/admin/delete-question/{{ question.id }}" method="post">
+                            <button type="submit" class="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600">Delete</button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+</body>
+</html>

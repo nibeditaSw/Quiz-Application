@@ -47,3 +47,23 @@ class QuizAttempt(Base):
     # Relationships
     user = relationship("User", back_populates="attempts")
     question = relationship("Question", back_populates="attempts")
+
+class Admin(Base):
+    __tablename__ = "admins"
+
+    id = Column(Integer, primary_key=True, index=True)
+    username = Column(String, unique=True, nullable=False)
+    hashed_password = Column(String, nullable=False) 
+
+class AdminQuestion(Base):
+    __tablename__ = "admin_questions"
+
+    id = Column(Integer, primary_key=True, index=True)
+    category = Column(String, nullable=False)
+    difficulty = Column(String, nullable=False)
+    question_text = Column(Text, nullable=False)
+    option_a = Column(String, nullable=False)
+    option_b = Column(String, nullable=False)
+    option_c = Column(String, nullable=False)
+    option_d = Column(String, nullable=False)
+    correct_option = Column(String, nullable=False) 

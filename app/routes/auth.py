@@ -1,5 +1,5 @@
 from datetime import datetime
-from fastapi import APIRouter, Depends, Request, Form
+from fastapi import APIRouter, Depends, HTTPException, Request, Form
 from sqlalchemy.orm import Session
 from sqlalchemy.sql.expression import func
 from app.database import SessionLocal, get_db
@@ -8,7 +8,7 @@ from app.utils import verify_password, store_questions_in_db
 from app.schemas import UserCreate
 from fastapi.responses import RedirectResponse
 from fastapi.templating import Jinja2Templates
-from app.models import User, Question, QuizAttempt
+from app.models import User, Question, QuizAttempt, Admin
 
 router = APIRouter()
 templates = Jinja2Templates(directory="app/templates")
@@ -32,15 +32,34 @@ def login_page(request: Request):
     return templates.TemplateResponse("login.html", {"request": request})
 
 
+# @router.post("/login")
+# def login_user(request: Request, username: str = Form(...), password: str = Form(...), db: Session = Depends(get_db)):
+#     user = get_user_by_username(db, username)
+#     if not user or not verify_password(password, user.hashed_password):
+#         return templates.TemplateResponse("login.html", {"request": request, "error": "Invalid credentials"})
+#     response = RedirectResponse(url="/auth/start-quiz", status_code=303)
+#     response.set_cookie(key="user_id", value=str(user.id))  # Set user ID in cookies
+#     return response
+
 @router.post("/login")
 def login_user(request: Request, username: str = Form(...), password: str = Form(...), db: Session = Depends(get_db)):
-    user = get_user_by_username(db, username)
-    if not user or not verify_password(password, user.hashed_password):
-        return templates.TemplateResponse("login.html", {"request": request, "error": "Invalid credentials"})
-    response = RedirectResponse(url="/auth/start-quiz", status_code=303)
-    response.set_cookie(key="user_id", value=str(user.id))  # Set user ID in cookies
-    return response
+    # First, check if the user is an admin
+    admin = db.query(Admin).filter(Admin.username == username).first()
+    if admin and verify_password(password, admin.hashed_password):
+        response = RedirectResponse(url="/admin/admin", status_code=303)
+        response.set_cookie("is_admin", "true", httponly=True, secure=True)
+        return response
 
+    # Otherwise, check if it's a normal user
+    user = db.query(User).filter(User.username == username).first()
+    if not user or not verify_password(password, user.hashed_password):
+        return templates.TemplateResponse(
+            "login.html", {"request": request, "error": "Invalid credentials"}
+        )
+
+    response = RedirectResponse(url="/auth/start-quiz", status_code=303)
+    response.set_cookie("user_id", str(user.id), httponly=True, secure=True)
+    return response
 
 
 @router.get("/dashboard")
@@ -55,8 +74,8 @@ def dashboard(request: Request, db: Session = Depends(get_db), category: str = N
         return RedirectResponse(url="/auth/login", status_code=303)
 
     # Check if questions exist in DB; if not, fetch and store them
-    # if db.query(Question).count() == 0:
-    #     store_questions_in_db(db)
+    if db.query(Question).count() == 0:
+        store_questions_in_db(db)
     
     # Build the query for fetching questions
     query = db.query(Question)
@@ -221,3 +240,5 @@ async def start_quiz_post(request: Request, db: Session = Depends(get_db)):
 
     # Redirect to the dashboard with the selected category and difficulty
     return RedirectResponse(url=f"/auth/dashboard?category={category}&difficulty={difficulty}", status_code=303)
+
+
