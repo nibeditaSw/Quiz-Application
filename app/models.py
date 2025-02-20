@@ -28,6 +28,7 @@ class Question(Base):
     option_c = Column(String, nullable=False)
     option_d = Column(String, nullable=False)
     correct_option = Column(String, nullable=False) 
+    admincreated = Column(Boolean, nullable=False, default=False)
 
     # Relationship to link question attempts
     attempts = relationship("QuizAttempt", back_populates="question")
@@ -55,15 +56,3 @@ class Admin(Base):
     username = Column(String, unique=True, nullable=False)
     hashed_password = Column(String, nullable=False) 
 
-class AdminQuestion(Base):
-    __tablename__ = "admin_questions"
-
-    id = Column(Integer, primary_key=True, index=True)
-    category = Column(String, nullable=False)
-    difficulty = Column(String, nullable=False)
-    question_text = Column(Text, nullable=False)
-    option_a = Column(String, nullable=False)
-    option_b = Column(String, nullable=False)
-    option_c = Column(String, nullable=False)
-    option_d = Column(String, nullable=False)
-    correct_option = Column(String, nullable=False) 

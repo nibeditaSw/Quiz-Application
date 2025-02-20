@@ -9,14 +9,14 @@
 <body class="bg-gray-100 font-sans antialiased">
 
     <!-- Navbar -->
-    <nav class="bg-gray-800 p-4 shadow-md">
+    <nav class="bg-blue-500 p-4 shadow-md">
         <div class="max-w-8xl mx-auto flex items-center justify-between">
             <div class="text-white font-semibold text-lg">
                 Admin Panel
             </div>
             <div class="space-x-4">
-                <a href="/admin/admin" class="text-white hover:text-gray-300">Home</a>
-                <a href="/admin/admin/questions" class="text-white hover:text-gray-300">Questions</a>
+                <a href="/admin/admin" class="text-white hover:text-gray-300">🏠Home</a>
+                <a href="/admin/admin/questions" class="text-white hover:text-gray-300">📋All Questions</a>
             </div>
             <form action="/auth/logout" method="post">
                 <button type="submit" class="px-3 py-1 bg-red-600 text-white rounded-md hover:bg-red-700 text-sm">Logout</button>
@@ -46,7 +46,7 @@
                         <td class="px-4 py-3">{{ user.score }}</td>
                         <td class="px-4 py-3 text-center">
                             <a href="/admin/admin/edit/{{ user.id }}" 
-                                class="px-3 py-1 bg-blue-500 text-white rounded-md text-sm hover:bg-blue-600 transition">Edit</a>
+                                class="px-3 py-1 bg-blue-400 text-white rounded-md text-sm hover:bg-blue-600 transition">Edit</a>
                             <form action="/admin/admin/delete/{{ user.id }}" method="post" class="inline">
                                 <button type="submit" 
                                     class="px-3 py-1 bg-red-500 text-white rounded-md text-sm hover:bg-red-600 transition">

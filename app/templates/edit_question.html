@@ -9,14 +9,14 @@
 <body class="bg-gray-100 font-sans antialiased">
 
     <!-- Navbar -->
-    <nav class="bg-gray-800 p-4 shadow-md">
+    <nav class="bg-blue-500 p-4 shadow-md">
         <div class="max-w-8xl mx-auto flex items-center justify-between">
             <div class="text-white font-semibold text-lg">
                 Admin Panel
             </div>
             <div class="space-x-4">
-                <a href="/admin/admin" class="text-white hover:text-gray-300">Home</a>
-                <a href="/admin/admin/questions" class="text-white hover:text-gray-300">Questions</a>
+                <a href="/admin/admin" class="text-white hover:text-gray-300">🏠Home</a>
+                <a href="/admin/admin/questions" class="text-white hover:text-gray-300">📋All Questions</a>
             </div>
             <form action="/auth/logout" method="post">
                 <button type="submit" class="px-3 py-1 bg-red-600 text-white rounded-md hover:bg-red-700 text-sm">Logout</button>
@@ -59,10 +59,10 @@
             <div>
                 <label class="text-gray-700 text-sm font-medium">Correct Option</label>
                 <select name="correct_option" required class="w-full px-3 py-2 border rounded-md text-sm">
-                    <option value="A" {% if question.correct_option == "A" %}selected{% endif %}>A</option>
-                    <option value="B" {% if question.correct_option == "B" %}selected{% endif %}>B</option>
-                    <option value="C" {% if question.correct_option == "C" %}selected{% endif %}>C</option>
-                    <option value="D" {% if question.correct_option == "D" %}selected{% endif %}>D</option>
+                    <option value="A" {% if question.correct_option == question.option_a %}selected{% endif %}>Option A</option>
+                    <option value="B" {% if question.correct_option == question.option_b %}selected{% endif %}>Option B</option>
+                    <option value="C" {% if question.correct_option == question.option_c %}selected{% endif %}>Option C</option>
+                    <option value="D" {% if question.correct_option == question.option_d %}selected{% endif %}>Option D</option>
                 </select>
             </div>
 
@@ -73,6 +73,9 @@
                     <select name="category" required class="w-full px-3 py-2 border rounded-md text-sm">
                         <option value="Film" {% if question.category == "Film" %}selected{% endif %}>Film</option>
                         <option value="Mythology" {% if question.category == "Mythology" %}selected{% endif %}>Mythology</option>
+                        <option value="Science: Computers" {% if question.category == "Science: Computers" %}selected{% endif %}>Science: Computers</option>
+                        <option value="General Knowledge" {% if question.category == "General Knowledge" %}selected{% endif %}>General Knowledge</option>
+                        <option value="History" {% if question.category == "History" %}selected{% endif %}>History</option>
                     </select>
                 </div>
 
@@ -81,9 +84,9 @@
                 <div>
                     <label class="text-gray-700 text-sm font-medium">Difficulty</label>
                     <select name="difficulty" required class="w-full px-3 py-2 border rounded-md text-sm">
-                        <option value="Easy" {% if question.difficulty == "Easy" %}selected{% endif %}>Easy</option>
-                        <option value="Medium" {% if question.difficulty == "Medium" %}selected{% endif %}>Medium</option>
-                        <option value="Hard" {% if question.difficulty == "Hard" %}selected{% endif %}>Hard</option>
+                        <option value="easy" {% if question.difficulty == "easy" %}selected{% endif %}>Easy</option>
+                        <option value="medium" {% if question.difficulty == "medium" %}selected{% endif %}>Medium</option>
+                        <option value="hard" {% if question.difficulty == "hard" %}selected{% endif %}>Hard</option>
                     </select>
                 </div>
             </div>
@@ -91,7 +94,7 @@
             <!-- Submit Button -->
             <div class="flex justify-end space-x-2">
                 <a href="/admin/admin/questions" class="px-4 py-2 bg-gray-300 text-gray-800 rounded-md hover:bg-gray-400 text-sm">Cancel</a>
-                <button type="submit" class="px-4 py-2 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700">
+                <button type="submit" class="px-4 py-2 bg-blue-400 text-white font-semibold rounded-lg hover:bg-blue-600">
                     Update Question
                 </button>
             </div>

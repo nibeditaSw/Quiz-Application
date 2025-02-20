@@ -1,45 +1,34 @@
-<!-- <!DOCTYPE html>
-<html>
-<head>
-    <title>Register</title>
-</head>
-<body>
-    <h2>Register</h2>
-    <form method="POST">
-        <input type="text" name="username" placeholder="Username" required><br>
-        <input type="email" name="email" placeholder="Email" required><br>
-        <input type="password" name="password" placeholder="Password" required><br>
-        <button type="submit">Register</button>
-    </form>
-    {% if error %}<p style="color:red;">{{ error }}</p>{% endif %}
-</body>
-</html> -->
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Register</title>
-    <!-- Tailwind CSS CDN -->
+    <title>Register Page</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="bg-gray-100 flex justify-center items-center h-screen">
+<body class="bg-gradient-to-r from-blue-500 to-purple-600 flex justify-center items-center min-h-screen">
 
-    <div class="bg-white p-8 rounded-lg shadow-md w-96">
-        <h2 class="text-2xl font-semibold text-center mb-4">Register</h2>
-        <form method="POST" class="space-y-4">
-            <input type="text" name="username" placeholder="Username" required
-                class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400">
-            
-            <input type="email" name="email" placeholder="Email" required
-                class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400">
-            
-            <input type="password" name="password" placeholder="Password" required
-                class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400">
-            
+    <div class="bg-white p-8 rounded-2xl shadow-2xl w-96">
+        <h2 class="text-3xl font-bold text-gray-800 text-center mb-6">Create an Account</h2>
+
+        <form method="POST" class="space-y-5">
+            <div>
+                <input type="text" name="username" placeholder="Username" required
+                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition duration-200 shadow-sm">
+            </div>
+
+            <div>
+                <input type="email" name="email" placeholder="Email" required
+                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition duration-200 shadow-sm">
+            </div>
+
+            <div>
+                <input type="password" name="password" placeholder="Password" required
+                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition duration-200 shadow-sm">
+            </div>
+
             <button type="submit"
-                class="w-full bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 rounded-lg transition duration-300">
+                class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-lg transition duration-300 shadow-md">
                 Register
             </button>
         </form>
@@ -47,9 +36,10 @@
         {% if error %}
             <p class="text-red-500 text-center mt-4">{{ error }}</p>
         {% endif %}
-        <p class="mt-4 text-sm text-center text-gray-600">
+
+        <p class="mt-6 text-sm text-center text-gray-600">
             Already have an account? 
-            <a href="/auth/login" class="text-blue-500 hover:underline">Login here</a>
+            <a href="/auth/login" class="text-blue-500 hover:underline font-semibold">Login here</a>
         </p>
     </div>
 
