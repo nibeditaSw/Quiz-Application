@@ -4,60 +4,52 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard</title>
-   
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="bg-gray-100 font-sans antialiased">
+<body class="bg-gray-100 font-sans">
 
-   
-    <!-- <nav class="bg-blue-600 p-4 shadow-md">
+    <nav class="bg-gradient-to-r from-blue-600 to-indigo-600 p-3 shadow-lg">
         <div class="max-w-6xl mx-auto flex items-center justify-between">
-            <div class="text-white font-semibold text-xl">
-                Welcome, {{ user.username }}!
-            </div>
-            <div class="text-white space-x-4 text-sm">
-                <span>Your email: <strong>{{ user.email }}</strong></span>
-                <span>Your Total Score: <strong>{{ user.score }}</strong></span>
-                <span>Your Token Balance: <strong>{{ user.token }}</strong></span>
-            </div>
-            <div>
-                <form action="/auth/logout" method="post">
-                    <button type="submit" class="px-6 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-400">Logout</button>
-                </form>
+            <div class="text-white font-bold text-xl">🧮 Quiz Dashboard!! </div>
+            <div class="flex items-center space-x-6">
+                <div class="text-white text-sm space-x-4">
+                    <span>📧 Email: <strong>{{ user.email }}</strong></span>
+                    <span>🏆 Score: <strong>{{ user.score }}</strong></span>
+                    <span>🎟 Tokens: <strong>{{ user.token }}</strong></span>
+                </div>
             </div>
         </div>
-    </nav> -->
-
-   
-    <div class="max-w-4xl mx-auto p-6 bg-white rounded-lg shadow-md mt-10">
-        <h2 class="text-3xl font-semibold text-gray-800">⏱️Quiz Time!</h2>
+    </nav>
+    
+    <div class="max-w-4xl mx-auto p-8 bg-white rounded-lg shadow-lg mt-12">
+        <h2 class="text-4xl font-bold text-gray-800 flex items-center">⏱️Quiz Time!</h2>
         <form action="/auth/submit-quiz" method="post" class="space-y-6 mt-6">
             {% if questions %}
                 {% for q in questions %}
-                    <div class="bg-gray-50 p-4 rounded-lg shadow-sm">
-                        <p class="text-xl font-medium text-gray-800 mb-2">{{ q.question_text }}</p>
-                        <p class="text-sm text-gray-500 mb-3"><em>Category: {{ q.category }} | Difficulty: {{ q.difficulty }}</em></p>
+                    <div class="bg-gray-50 p-5 rounded-lg shadow-md border border-gray-200">
+                        <p class="text-xl font-semibold text-gray-800">{{ q.question_text }}</p>
+                        <p class="text-sm text-gray-500 mb-4"><em>Category: {{ q.category }} | Difficulty: {{ q.difficulty }}</em></p>
         
-                        <div class="space-y-2">
-                            <label class="block">
-                                <input type="radio" name="q{{ q.id }}" value="a" class="mr-2 leading-tight">
+                        <div class="space-y-3">
+                            <label class="flex items-center space-x-3 cursor-pointer">
+                                <input type="radio" name="q{{ q.id }}" value="a" class="accent-blue-600">
                                 <span class="text-gray-700">{{ q.option_a }}</span>
                             </label>
-                            <label class="block">
-                                <input type="radio" name="q{{ q.id }}" value="b" class="mr-2 leading-tight">
+                            <label class="flex items-center space-x-3 cursor-pointer">
+                                <input type="radio" name="q{{ q.id }}" value="b" class="accent-blue-600">
                                 <span class="text-gray-700">{{ q.option_b }}</span>
                             </label>
         
                             {% if q.option_c %}
-                                <label class="block">
-                                    <input type="radio" name="q{{ q.id }}" value="c" class="mr-2 leading-tight">
+                                <label class="flex items-center space-x-3 cursor-pointer">
+                                    <input type="radio" name="q{{ q.id }}" value="c" class="accent-blue-600">
                                     <span class="text-gray-700">{{ q.option_c }}</span>
                                 </label>
                             {% endif %}
         
                             {% if q.option_d %}
-                                <label class="block">
-                                    <input type="radio" name="q{{ q.id }}" value="d" class="mr-2 leading-tight">
+                                <label class="flex items-center space-x-3 cursor-pointer">
+                                    <input type="radio" name="q{{ q.id }}" value="d" class="accent-blue-600">
                                     <span class="text-gray-700">{{ q.option_d }}</span>
                                 </label>
                             {% endif %}
@@ -68,20 +60,12 @@
                 <p class="text-lg text-red-500">No quiz questions available.</p>
             {% endif %}
             
-            <div class="flex justify-center space-x-4">
-                <button type="submit" class="px-6 py-2 text-white bg-blue-600 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-400">
-                    🚀 Submit Quiz
-                </button>
+            <div class="flex justify-center space-x-6 mt-8">
+                <button type="submit" class="px-8 py-3 text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition font-medium shadow-md">🚀 Submit Quiz</button>
                 
-                <a href="/auth/start-quiz" class="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-400">
-                    🔄 Start Again
-                </a>
+                <a href="/auth/start-quiz" class="px-8 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition font-medium shadow-md">🔄 Start Again</a>
             </div>
         </form>        
     </div>
-
 </body>
-</html> 
-
-
-
+</html>
