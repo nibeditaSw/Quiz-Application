@@ -15,12 +15,12 @@ def admin_page(request: Request, db: Session = Depends(get_db)):
     if is_admin != "true":
         return RedirectResponse(url="/auth/login", status_code=303)
 
-    questions = db.query(Question).all()  # Fetch all questions
+    # questions = db.query(Question).all()  # Fetch all questions
     users = db.query(User).all()  # Fetch all users
 
     return templates.TemplateResponse("admin.html", {
         "request": request,
-        "questions": questions,
+        # "questions": questions,
         "users": users,
     })
 
@@ -71,19 +71,19 @@ def delete_user(request: Request, user_id: int, db: Session = Depends(get_db)):
     return RedirectResponse(url="/admin/admin", status_code=303)
 
 
-# ✅ Question List Page
+# Question List Page
 @router.get("/admin/questions")
 def admin_questions(request: Request, db: Session = Depends(get_db)):
     questions = db.query(AdminQuestion).all()
     return templates.TemplateResponse("admin_questions.html", {"request": request, "questions": questions})
 
 
-# ✅ Create Question Page (GET)
+# Create Question Page (GET)
 @router.get("/admin/create-question")
 def create_question_page(request: Request):
     return templates.TemplateResponse("create_question.html", {"request": request})
 
-# ✅ Create Question (POST)
+# Create Question (POST)
 @router.post("/admin/create-question")
 def create_question(
     request: Request,
@@ -117,6 +117,8 @@ def create_question(
     db.commit()
     return RedirectResponse(url="/admin/admin/questions", status_code=303)
 
+
+# edit Question(GET)
 @router.get("/admin/edit-question/{id}")
 def edit_question(request: Request, id: int, db: Session = Depends(get_db)):
     question = db.query(AdminQuestion).filter(AdminQuestion.id == id).first()
@@ -124,7 +126,8 @@ def edit_question(request: Request, id: int, db: Session = Depends(get_db)):
         return {"error": "Question not found"}
     return templates.TemplateResponse("edit_question.html", {"request": request, "question": question})
 
-# ✅ 3️⃣ Update Question
+
+# edit Question(POST)
 @router.post("/admin/edit-question/{id}")
 def update_question(
     id: int,
@@ -152,9 +155,9 @@ def update_question(
     db_question.difficulty = difficulty
 
     db.commit()
-    return {"message": "Question updated successfully"}
+    return RedirectResponse(url="/admin/admin/questions", status_code=303)
 
-# ✅ 4️⃣ Delete Question
+# Delete Question
 @router.post("/admin/delete-question/{id}")
 def delete_question(id: int, db: Session = Depends(get_db)):
     question = db.query(AdminQuestion).filter(AdminQuestion.id == id).first()
@@ -163,4 +166,4 @@ def delete_question(id: int, db: Session = Depends(get_db)):
 
     db.delete(question)
     db.commit()
-    return {"message": "Question deleted successfully"}
+    return RedirectResponse(url="/admin/admin/questions", status_code=303)

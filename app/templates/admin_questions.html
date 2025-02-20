@@ -8,58 +8,75 @@
 </head>
 <body class="bg-gray-100 font-sans antialiased">
 
-    <!-- ✅ Navigation Bar -->
+    <!-- Navigation Bar -->
     <nav class="bg-gray-800 p-4 shadow-md">
-        <div class="max-w-6xl mx-auto flex items-center justify-between">
-            <div class="text-white font-semibold text-xl">
+        <div class="max-w-8xl mx-auto flex items-center justify-between">
+            <div class="text-white font-semibold text-lg">
                 Admin Panel
             </div>
             <div class="space-x-4">
-                <a href="/admin/admin/home" class="px-4 py-2 text-white hover:bg-gray-700 rounded-lg">Home</a>
-                <a href="/admin/admin/questions" class="px-4 py-2 text-white hover:bg-gray-700 rounded-lg">Question List</a>
-                <a href="/admin/admin" class="px-4 py-2 text-white hover:bg-gray-700 rounded-lg">User List</a>
+                <a href="/admin/admin" class="text-white hover:text-gray-300">Home</a>
+                <a href="/admin/admin/questions" class="text-white hover:text-gray-300">Questions</a>
             </div>
+            <form action="/auth/logout" method="post">
+                <button type="submit" class="px-3 py-1 bg-red-600 text-white rounded-md hover:bg-red-700 text-sm">Logout</button>
+            </form>
         </div>
     </nav>
 
-    <!-- ✅ Page Content -->
-    <div class="max-w-6xl mx-auto mt-10 p-6 bg-white rounded-lg shadow-lg">
-        <div class="flex justify-between items-center mb-6">
-            <h2 class="text-3xl font-bold text-gray-800">Questions List</h2>
-            <a href="/admin/admin/create-question" class="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition">
+    <!-- Page Content -->
+    <div class="max-w-5xl mx-auto mt-8 p-6 bg-white rounded-lg shadow-md">
+        <div class="flex justify-between items-center mb-4">
+            <h2 class="text-xl font-semibold text-gray-800">Questions List</h2>
+            <a href="/admin/admin/create-question" 
+                class="px-4 py-2 bg-green-500 text-white text-sm rounded-md hover:bg-green-600 transition">
                 + Create New Question
             </a>
         </div>
-
-        <!-- ✅ Questions Table -->
-        <table class="w-full border-collapse border border-gray-200 shadow-sm">
-            <thead>
-                <tr class="bg-gray-100">
-                    <th class="border border-gray-300 px-4 py-2">ID</th>
-                    <th class="border border-gray-300 px-4 py-2">Question</th>
-                    <th class="border border-gray-300 px-4 py-2">Category</th>
-                    <th class="border border-gray-300 px-4 py-2">Difficulty</th>
-                    <th class="border border-gray-300 px-4 py-2">Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for question in questions %}
-                <tr class="text-center">
-                    <td class="border border-gray-300 px-4 py-2">{{ question.id }}</td>
-                    <td class="border border-gray-300 px-4 py-2 text-left">{{ question.question_text }}</td>
-                    <td class="border border-gray-300 px-4 py-2">{{ question.category }}</td>
-                    <td class="border border-gray-300 px-4 py-2">{{ question.difficulty }}</td>
-                    <td class="border border-gray-300 px-4 py-2 flex justify-center space-x-2">
-                        <a href="/admin/admin/edit-question/{{ question.id }}" class="px-3 py-1 bg-blue-500 text-white rounded hover:bg-blue-600">Edit</a>
-                        <form action="/admin/admin/delete-question/{{ question.id }}" method="post">
-                            <button type="submit" class="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600">Delete</button>
-                        </form>
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+    
+        <!-- Questions Table -->
+        <div class="overflow-x-auto">
+            <table class="w-full border border-gray-200 rounded-lg overflow-hidden">
+                <thead class="bg-gray-100 text-gray-700 text-sm">
+                    <tr>
+                        <th class="px-4 py-2 text-left">ID</th>
+                        <th class="px-4 py-2 text-left">Question</th>
+                        <th class="px-4 py-2 text-left">Category</th>
+                        <th class="px-4 py-2 text-left">Difficulty</th>
+                        <th class="px-4 py-2 text-center">Actions</th>
+                    </tr>
+                </thead>
+                <tbody class="text-sm">
+                    {% for question in questions %}
+                    <tr class="border-t hover:bg-gray-50 transition">
+                        <td class="px-4 py-3">{{ question.id }}</td>
+                        <td class="px-4 py-3 truncate max-w-xs">{{ question.question_text }}</td>
+                        <td class="px-4 py-3">{{ question.category }}</td>
+                        <td class="px-4 py-3">
+                            <span class="px-2 py-1 rounded text-white text-xs font-semibold
+                                {% if question.difficulty == 'Easy' %} bg-green-500
+                                {% elif question.difficulty == 'Medium' %} bg-yellow-500
+                                {% else %} bg-red-500 {% endif %}">
+                                {{ question.difficulty }}
+                            </span>
+                        </td>
+                        <td class="px-4 py-3 text-center space-x-2">
+                            <a href="/admin/admin/edit-question/{{ question.id }}" 
+                                class="px-3 py-1 bg-blue-500 text-white text-xs rounded-md hover:bg-blue-600 transition">Edit</a>
+                            <form action="/admin/admin/delete-question/{{ question.id }}" method="post" class="inline">
+                                <button type="submit" 
+                                    class="px-3 py-1 bg-red-500 text-white text-xs rounded-md hover:bg-red-600 transition">
+                                    Delete
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
     </div>
+    
 
 </body>
 </html>

@@ -10,51 +10,55 @@
 
     <!-- Navbar -->
     <nav class="bg-gray-800 p-4 shadow-md">
-        <div class="max-w-6xl mx-auto flex items-center justify-between">
-            <div class="text-white font-semibold text-xl">Admin Panel</div>
-            <div class="space-x-4">
-                <a href="/admin/admin/home" class="px-4 py-2 text-white hover:bg-gray-700 rounded-lg">Home</a>
-                <a href="/admin/admin/questions" class="px-4 py-2 text-white hover:bg-gray-700 rounded-lg">Question List</a>
-                <a href="/admin/admin/users" class="px-4 py-2 text-white hover:bg-gray-700 rounded-lg">User List</a>
+        <div class="max-w-8xl mx-auto flex items-center justify-between">
+            <div class="text-white font-semibold text-lg">
+                Admin Panel
             </div>
+            <div class="space-x-4">
+                <a href="/admin/admin" class="text-white hover:text-gray-300">Home</a>
+                <a href="/admin/admin/questions" class="text-white hover:text-gray-300">Questions</a>
+            </div>
+            <form action="/auth/logout" method="post">
+                <button type="submit" class="px-3 py-1 bg-red-600 text-white rounded-md hover:bg-red-700 text-sm">Logout</button>
+            </form>
         </div>
     </nav>
 
     <!-- Edit Question Card -->
-    <div class="max-w-4xl mx-auto p-8 bg-white rounded-lg shadow-lg mt-10">
-        <h2 class="text-3xl font-semibold text-gray-800 mb-6">Edit Question</h2>
+    <div class="max-w-xl mx-auto mt-4 p-6 bg-white rounded-lg shadow-md">
+        <h2 class="text-xl font-semibold text-gray-800 text-center mb-1">Edit Question</h2>
 
-        <form action="/admin/admin/edit-question/{{ question.id }}" method="post" class="space-y-6">
+        <form action="/admin/admin/edit-question/{{ question.id }}" method="post" class="space-y-4">
             <!-- Question Text -->
             <div>
                 <label class="block text-gray-700 font-medium">Question</label>
-                <textarea name="question_text" required class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">{{ question.question_text }}</textarea>
+                <input name="question_text" type="text" required class="w-full mt-1 px-3 py-2 border rounded-md focus:ring focus:ring-blue-200 text-sm" value="{{ question.question_text }}">
             </div>
 
             <!-- Options -->
-            <div class="grid grid-cols-2 gap-4">
+            <div class="grid grid-cols-2 gap-3">
                 <div>
-                    <label class="block text-gray-700 font-medium">Option A</label>
-                    <input type="text" name="option_a" value="{{ question.option_a }}" required class="w-full p-3 border border-gray-300 rounded-lg">
+                    <label class="text-gray-700 text-sm font-medium">Option A</label>
+                    <input type="text" name="option_a" value="{{ question.option_a }}" required class="w-full px-3 py-2 border rounded-md text-sm">
                 </div>
                 <div>
-                    <label class="block text-gray-700 font-medium">Option B</label>
-                    <input type="text" name="option_b" value="{{ question.option_b }}" required class="w-full p-3 border border-gray-300 rounded-lg">
+                    <label class="text-gray-700 text-sm font-medium">Option B</label>
+                    <input type="text" name="option_b" value="{{ question.option_b }}" required class="w-full px-3 py-2 border rounded-md text-sm">
                 </div>
                 <div>
-                    <label class="block text-gray-700 font-medium">Option C</label>
-                    <input type="text" name="option_c" value="{{ question.option_c }}" required class="w-full p-3 border border-gray-300 rounded-lg">
+                    <label class="text-gray-700 text-sm font-medium">Option C</label>
+                    <input type="text" name="option_c" value="{{ question.option_c }}" required class="w-full px-3 py-2 border rounded-md text-sm">
                 </div>
                 <div>
-                    <label class="block text-gray-700 font-medium">Option D</label>
-                    <input type="text" name="option_d" value="{{ question.option_d }}" required class="w-full p-3 border border-gray-300 rounded-lg">
+                    <label class="text-gray-700 text-sm font-medium">Option D</label>
+                    <input type="text" name="option_d" value="{{ question.option_d }}" required class="w-full px-3 py-2 border rounded-md text-sm">
                 </div>
             </div>
 
             <!-- Correct Option Dropdown -->
             <div>
-                <label class="block text-gray-700 font-medium">Correct Option</label>
-                <select name="correct_option" required class="w-full p-3 border border-gray-300 rounded-lg">
+                <label class="text-gray-700 text-sm font-medium">Correct Option</label>
+                <select name="correct_option" required class="w-full px-3 py-2 border rounded-md text-sm">
                     <option value="A" {% if question.correct_option == "A" %}selected{% endif %}>A</option>
                     <option value="B" {% if question.correct_option == "B" %}selected{% endif %}>B</option>
                     <option value="C" {% if question.correct_option == "C" %}selected{% endif %}>C</option>
@@ -63,27 +67,31 @@
             </div>
 
             <!-- Category Dropdown -->
-            <div>
-                <label class="block text-gray-700 font-medium">Category</label>
-                <select name="category" required class="w-full p-3 border border-gray-300 rounded-lg">
-                    <option value="Film" {% if question.category == "Film" %}selected{% endif %}>Film</option>
-                    <option value="Mythology" {% if question.category == "Mythology" %}selected{% endif %}>Mythology</option>
-                </select>
-            </div>
+            <div class="grid grid-cols-2 gap-3">
+                <div>
+                    <label class="text-gray-700 text-sm font-medium">Category</label>
+                    <select name="category" required class="w-full px-3 py-2 border rounded-md text-sm">
+                        <option value="Film" {% if question.category == "Film" %}selected{% endif %}>Film</option>
+                        <option value="Mythology" {% if question.category == "Mythology" %}selected{% endif %}>Mythology</option>
+                    </select>
+                </div>
 
-            <!-- Difficulty Dropdown -->
-            <div>
-                <label class="block text-gray-700 font-medium">Difficulty</label>
-                <select name="difficulty" required class="w-full p-3 border border-gray-300 rounded-lg">
-                    <option value="Easy" {% if question.difficulty == "Easy" %}selected{% endif %}>Easy</option>
-                    <option value="Medium" {% if question.difficulty == "Medium" %}selected{% endif %}>Medium</option>
-                    <option value="Hard" {% if question.difficulty == "Hard" %}selected{% endif %}>Hard</option>
-                </select>
+                <!-- Difficulty Dropdown -->
+                
+                <div>
+                    <label class="text-gray-700 text-sm font-medium">Difficulty</label>
+                    <select name="difficulty" required class="w-full px-3 py-2 border rounded-md text-sm">
+                        <option value="Easy" {% if question.difficulty == "Easy" %}selected{% endif %}>Easy</option>
+                        <option value="Medium" {% if question.difficulty == "Medium" %}selected{% endif %}>Medium</option>
+                        <option value="Hard" {% if question.difficulty == "Hard" %}selected{% endif %}>Hard</option>
+                    </select>
+                </div>
             </div>
 
             <!-- Submit Button -->
-            <div class="flex justify-end">
-                <button type="submit" class="px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700">
+            <div class="flex justify-end space-x-2">
+                <a href="/admin/admin/questions" class="px-4 py-2 bg-gray-300 text-gray-800 rounded-md hover:bg-gray-400 text-sm">Cancel</a>
+                <button type="submit" class="px-4 py-2 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700">
                     Update Question
                 </button>
             </div>
