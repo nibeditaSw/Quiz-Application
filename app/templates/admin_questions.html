@@ -43,6 +43,7 @@
                         <th class="px-4 py-2 text-left">Question</th>
                         <th class="px-4 py-2 text-left">Category</th>
                         <th class="px-4 py-2 text-left">Difficulty</th>
+                        <th class="px-4 py-2 text-left">Correct Answer</th>
                         <th class="px-4 py-2 text-center">Actions</th>
                     </tr>
                 </thead>
@@ -60,6 +61,7 @@
                                 {{ question.difficulty }}
                             </span>
                         </td>
+                        <td class="px-4 py-3">Option {{ question.correct_option }}</td>
                         <td class="px-4 py-3 text-center space-x-2">
                             <a href="/admin/admin/edit-question/{{ question.id }}" 
                                 class="px-3 py-1 bg-blue-500 text-white text-xs rounded-md hover:bg-blue-600 transition">Edit</a>

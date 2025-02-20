@@ -34,6 +34,7 @@
                     <tr class="bg-gray-100 text-gray-700">
                         <th class="px-4 py-2 text-left">ID</th>
                         <th class="px-4 py-2 text-left">Username</th>
+                        <th class="px-4 py-2 text-left">Score</th>
                         <th class="px-4 py-2 text-center">Actions</th>
                     </tr>
                 </thead>
@@ -42,6 +43,7 @@
                     <tr class="border-t hover:bg-gray-50 transition">
                         <td class="px-4 py-3">{{ user.id }}</td>
                         <td class="px-4 py-3">{{ user.username }}</td>
+                        <td class="px-4 py-3">{{ user.score }}</td>
                         <td class="px-4 py-3 text-center">
                             <a href="/admin/admin/edit/{{ user.id }}" 
                                 class="px-3 py-1 bg-blue-500 text-white rounded-md text-sm hover:bg-blue-600 transition">Edit</a>
