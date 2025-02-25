@@ -181,7 +181,7 @@ def start_quiz(request: Request, db: Session = Depends(get_db)):
     categories = db.query(Question.category).distinct().all()
 
     # Fetch distinct difficulty levels from the DB and extract the values
-    difficulties = [difficulty[0] for difficulty in db.query(Question.difficulty).distinct().all()]
+    difficulties = db.query(Question.difficulty).distinct().all()
     
     top_users = db.query(User).order_by(User.score.desc()).limit(5).all()
     

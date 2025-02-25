@@ -51,8 +51,8 @@
             <div>
                 <label for="difficulty" class="text-lg font-medium text-gray-800">⚡️ Select Difficulty</label>
                 <select name="difficulty" id="difficulty" class="block w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
-                    {% for diff in difficulties %}
-                        <option value="{{ diff }}">{{ diff | capitalize }}</option>
+                    {% for difficulty in difficulties %}
+                        <option value="{{difficulty[0] }}">{{ difficulty[0] | capitalize }}</option>
                     {% endfor %}
                 </select>
             </div>
