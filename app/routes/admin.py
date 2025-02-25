@@ -24,6 +24,13 @@ def admin_page(request: Request, db: Session = Depends(get_db)):
         "users": users,
     })
 
+@router.post("/admin-logout")
+def logout():
+    response = RedirectResponse(url="/auth/login", status_code=303)
+    response.delete_cookie("is_admin")  # Clear session cookie
+    return response
+
+
 # Edit User Page 
 @router.get("/admin/edit/{user_id}")
 def edit_user_page(user_id: int, request: Request, db: Session = Depends(get_db)):

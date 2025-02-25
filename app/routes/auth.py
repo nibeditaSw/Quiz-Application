@@ -1,10 +1,10 @@
 from datetime import datetime
-from fastapi import APIRouter, Depends, HTTPException, Request, Form
+from fastapi import APIRouter, Depends, Request, Form
 from sqlalchemy.orm import Session
 from sqlalchemy.sql.expression import func
-from app.database import SessionLocal, get_db
+from app.database import get_db
 from app.crud import create_user, get_user_by_username
-from app.utils import verify_password, store_questions_in_db
+from app.utils import verify_password, store_questions_in_db, get_current_user
 from app.schemas import UserCreate
 from fastapi.responses import RedirectResponse
 from fastapi.templating import Jinja2Templates
@@ -32,15 +32,6 @@ def login_page(request: Request):
     return templates.TemplateResponse("login.html", {"request": request})
 
 
-# @router.post("/login")
-# def login_user(request: Request, username: str = Form(...), password: str = Form(...), db: Session = Depends(get_db)):
-#     user = get_user_by_username(db, username)
-#     if not user or not verify_password(password, user.hashed_password):
-#         return templates.TemplateResponse("login.html", {"request": request, "error": "Invalid credentials"})
-#     response = RedirectResponse(url="/auth/start-quiz", status_code=303)
-#     response.set_cookie(key="user_id", value=str(user.id))  # Set user ID in cookies
-#     return response
-
 @router.post("/login")
 def login_user(request: Request, username: str = Form(...), password: str = Form(...), db: Session = Depends(get_db)):
     # First, check if the user is an admin
@@ -51,7 +42,7 @@ def login_user(request: Request, username: str = Form(...), password: str = Form
         return response
 
     # Otherwise, check if it's a normal user
-    user = db.query(User).filter(User.username == username).first()
+    user = get_user_by_username(db, username)  
     if not user or not verify_password(password, user.hashed_password):
         return templates.TemplateResponse(
             "login.html", {"request": request, "error": "Invalid credentials"}
@@ -64,12 +55,7 @@ def login_user(request: Request, username: str = Form(...), password: str = Form
 
 @router.get("/dashboard")
 def dashboard(request: Request, db: Session = Depends(get_db), category: str = None, difficulty: str = None):
-    user_id = request.cookies.get("user_id")
-    
-    if not user_id:
-        return RedirectResponse(url="/auth/login", status_code=303)
-    
-    user = db.query(User).filter(User.id == int(user_id)).first()
+    user = get_current_user(request, db)
     if not user:
         return RedirectResponse(url="/auth/login", status_code=303)
 
@@ -110,12 +96,7 @@ async def submit_quiz(
     request: Request,
     db: Session = Depends(get_db)
 ):
-    user_id = request.cookies.get("user_id")
-
-    if not user_id:
-        return RedirectResponse(url="/auth/login", status_code=303)
-
-    user = db.query(User).filter(User.id == int(user_id)).first()
+    user = get_current_user(request, db)
     if not user:
         return RedirectResponse(url="/auth/login", status_code=303)
 
@@ -173,11 +154,7 @@ async def submit_quiz(
 
 @router.get("/review-quiz")
 async def review_quiz(request: Request, session_id: int, db: Session = Depends(get_db)):
-    user_id = request.cookies.get("user_id")
-    if not user_id:
-        return RedirectResponse(url="/auth/login", status_code=303)
-
-    user = db.query(User).filter(User.id == int(user_id)).first()
+    user = get_current_user(request, db)
     if not user:
         return RedirectResponse(url="/auth/login", status_code=303)
 
@@ -196,12 +173,7 @@ async def review_quiz(request: Request, session_id: int, db: Session = Depends(g
 
 @router.get("/start-quiz")
 def start_quiz(request: Request, db: Session = Depends(get_db)):
-    user_id = request.cookies.get("user_id")
-    
-    if not user_id:
-        return RedirectResponse(url="/auth/login", status_code=303)  # Redirect if not logged in
-    
-    user = db.query(User).filter(User.id == int(user_id)).first()
+    user = get_current_user(request, db)
     if not user:
         return RedirectResponse(url="/auth/login", status_code=303)
     
@@ -224,12 +196,7 @@ def start_quiz(request: Request, db: Session = Depends(get_db)):
 
 @router.post("/start-quiz")
 async def start_quiz_post(request: Request, db: Session = Depends(get_db)):
-    user_id = request.cookies.get("user_id")
-    
-    if not user_id:
-        return RedirectResponse(url="/auth/login", status_code=303)
-    
-    user = db.query(User).filter(User.id == int(user_id)).first()
+    user = get_current_user(request, db)
     if not user:
         return RedirectResponse(url="/auth/login", status_code=303)
     

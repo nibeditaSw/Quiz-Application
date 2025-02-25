@@ -1,8 +1,9 @@
 import random
 import requests
+from fastapi import Request
 from passlib.context import CryptContext
 from sqlalchemy.orm import Session
-from app.models import Question
+from app.models import Question, User
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
@@ -12,17 +13,11 @@ def hash_password(password: str) -> str:
 def verify_password(plain_password: str, hashed_password: str) -> bool:
     return pwd_context.verify(plain_password, hashed_password)
 
-
-# Fetch Questions from Open Trivia API
-# def fetch_questions_from_api():
-#     url = "https://opentdb.com/api.php?amount=10&category=18&difficulty=easy"
-#     response = requests.get(url)
-
-#     if response.status_code == 200:
-#         data = response.json()
-#         return data.get("results", [])  # Extract the results list
-#     return []
-
+def get_current_user(request: Request, db: Session):
+    user_id = request.cookies.get("user_id")
+    if not user_id:
+        return None
+    return db.query(User).filter(User.id == int(user_id)).first()
 
 
 def store_questions_in_db(db: Session):
