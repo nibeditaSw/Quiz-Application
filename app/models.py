@@ -14,6 +14,8 @@ class User(Base):
 
     # Relationship to link user attempts
     attempts = relationship("QuizAttempt", back_populates="user")
+    quiz_stats = relationship("UserQuizStats", back_populates="user")
+
 
 
 class Question(Base):
@@ -56,3 +58,15 @@ class Admin(Base):
     username = Column(String, unique=True, nullable=False)
     hashed_password = Column(String, nullable=False) 
 
+class UserQuizStats(Base):
+    __tablename__ = "user_quiz_stats"
+
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    category = Column(String, nullable=False)
+    difficulty = Column(String, nullable=False)
+    solved_count = Column(Integer, default=0)
+    correct_count = Column(Integer, default=0)
+    
+    # Relationship to link user stats
+    user = relationship("User", back_populates="quiz_stats")

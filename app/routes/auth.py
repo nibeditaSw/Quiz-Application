@@ -8,7 +8,7 @@ from app.utils import verify_password, store_questions_in_db, get_current_user
 from app.schemas import UserCreate
 from fastapi.responses import RedirectResponse
 from fastapi.templating import Jinja2Templates
-from app.models import User, Question, QuizAttempt, Admin
+from app.models import User, Question, QuizAttempt, Admin, UserQuizStats
 
 router = APIRouter()
 templates = Jinja2Templates(directory="app/templates")
@@ -83,7 +83,6 @@ def dashboard(request: Request, db: Session = Depends(get_db), category: str = N
     })
 
 
-
 @router.post("/logout")
 def logout():
     response = RedirectResponse(url="/auth/login", status_code=303)
@@ -92,10 +91,7 @@ def logout():
 
 
 @router.post("/submit-quiz")
-async def submit_quiz(
-    request: Request,
-    db: Session = Depends(get_db)
-):
+async def submit_quiz(request: Request, db: Session = Depends(get_db)):
     user = get_current_user(request, db)
     if not user:
         return RedirectResponse(url="/auth/login", status_code=303)
@@ -107,26 +103,26 @@ async def submit_quiz(
     session_id = int(datetime.utcnow().timestamp())
 
     # Extract the question IDs
-    question_ids = [int(key[1:]) for key in form_data.keys() if key.startswith('q')]
+    question_ids = [int(key[1:]) for key in form_data.keys() if key.startswith("q")]
     questions = db.query(Question).filter(Question.id.in_(question_ids)).all()
     score = 0
 
     for q in questions:
-        user_answer_key = form_data.get(f"q{q.id}")  
-        
+        user_answer_key = form_data.get(f"q{q.id}")
+
         # Mapping user selection to actual answer
         option_mapping = {
             "a": q.option_a,
             "b": q.option_b,
             "c": q.option_c,
-            "d": q.option_d
+            "d": q.option_d,
         }
-        user_answer = option_mapping.get(user_answer_key)  
+        user_answer = option_mapping.get(user_answer_key)
 
         # Check if correct
         is_correct = user_answer == q.correct_option
         if is_correct:
-            score += 1  
+            score += 1
 
         # Store the attempt
         attempt = QuizAttempt(
@@ -135,21 +131,49 @@ async def submit_quiz(
             user_answer=user_answer,
             correct_answer=q.correct_option,
             is_correct=is_correct,
-            session_id=session_id
+            session_id=session_id,
         )
         db.add(attempt)
+
+        # Update or create user quiz stats
+        user_quiz_stat = (
+            db.query(UserQuizStats)
+            .filter(
+                UserQuizStats.user_id == user.id,
+                UserQuizStats.category == q.category,
+                UserQuizStats.difficulty == q.difficulty,
+            )
+            .first()
+        )
+
+        if user_quiz_stat:
+            user_quiz_stat.solved_count += 1  # Increment total attempts
+            if is_correct:
+                user_quiz_stat.correct_count += 1  # Increment correct answers
+        else:
+            new_stat = UserQuizStats(
+                user_id=user.id,
+                category=q.category,
+                difficulty=q.difficulty,
+                solved_count=1,
+                correct_count=1 if is_correct else 0,
+            )
+            db.add(new_stat)
 
     user.score += score
     db.commit()
 
     total_attempted = len(questions)
 
-    return templates.TemplateResponse("result.html", {
-        "request": request,
-        "score": score,
-        "total_attempted": total_attempted,
-        "session_id": session_id  # Pass session_id for review
-    })
+    return templates.TemplateResponse(
+        "result.html",
+        {
+            "request": request,
+            "score": score,
+            "total_attempted": total_attempted,
+            "session_id": session_id,  # Pass session_id for review
+        },
+    )
 
 
 @router.get("/review-quiz")
@@ -185,12 +209,15 @@ def start_quiz(request: Request, db: Session = Depends(get_db)):
     
     top_users = db.query(User).order_by(User.score.desc()).limit(5).all()
     
+    user_stats = db.query(UserQuizStats).order_by(UserQuizStats.correct_count.desc()).all()
+    
     return templates.TemplateResponse("quiz_start.html", {
         "request": request, 
         "user": user, 
         "categories": categories,
         "difficulties": difficulties,
-        "top_users": top_users
+        "top_users": top_users,
+        "user_stats": user_stats
     })
 
 
@@ -207,5 +234,3 @@ async def start_quiz_post(request: Request, db: Session = Depends(get_db)):
 
     # Redirect to the dashboard with the selected category and difficulty
     return RedirectResponse(url=f"/auth/dashboard?category={category}&difficulty={difficulty}", status_code=303)
-
-
