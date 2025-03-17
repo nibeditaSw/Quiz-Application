@@ -23,7 +23,7 @@
     
     <div class="max-w-4xl mx-auto p-8 bg-white rounded-lg shadow-lg mt-12">
         <h2 class="text-4xl font-bold text-gray-800 flex items-center">⏱️Quiz Time!</h2>
-        <form action="/auth/submit-quiz" method="post" class="space-y-6 mt-6">
+        <form action="/submit-quiz" method="post" class="space-y-6 mt-6">
             {% if questions %}
                 {% for q in questions %}
                     <div class="bg-gray-50 p-5 rounded-lg shadow-md border border-gray-200">
@@ -63,7 +63,7 @@
             <div class="flex justify-center space-x-6 mt-8">
                 <button type="submit" class="px-8 py-3 text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition font-medium shadow-md">🚀 Submit Quiz</button>
                 
-                <a href="/auth/start-quiz" class="px-8 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition font-medium shadow-md">🔄 Start Again</a>
+                <a href="/start-quiz" class="px-8 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition font-medium shadow-md">🔄 Start Again</a>
             </div>
         </form>        
     </div>

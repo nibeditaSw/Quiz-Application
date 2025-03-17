@@ -15,10 +15,10 @@
                 Admin Panel
             </div>
             <div class="space-x-4">
-                <a href="/admin/admin" class="text-white hover:text-gray-300">🏠Home</a>
-                <a href="/admin/admin/questions" class="text-white hover:text-gray-300">📋All Questions</a>
+                <a href="/admin" class="text-white hover:text-gray-300">🏠Home</a>
+                <a href="/admin/questions" class="text-white hover:text-gray-300">📋All Questions</a>
             </div>
-            <form action="/admin/admin-logout" method="post">
+            <form action="/admin-logout" method="post">
                 <button type="submit" class="px-3 py-1 bg-red-600 text-white rounded-md hover:bg-red-700 text-sm">Logout</button>
             </form>
         </div>
@@ -28,7 +28,7 @@
     <div class="max-w-xl mx-auto mt-4 p-6 bg-white rounded-lg shadow-md">
         <h2 class="text-xl font-semibold text-gray-800 text-center mb-1">Edit Question</h2>
 
-        <form action="/admin/admin/edit-question/{{ question.id }}" method="post" class="space-y-4">
+        <form action="/admin/edit-question/{{ question.id }}" method="post" class="space-y-4">
             <!-- Question Text -->
             <div>
                 <label class="block text-gray-700 font-medium">Question</label>
@@ -93,7 +93,7 @@
 
             <!-- Submit Button -->
             <div class="flex justify-end space-x-2">
-                <a href="/admin/admin/questions" class="px-4 py-2 bg-gray-300 text-gray-800 rounded-md hover:bg-gray-400 text-sm">Cancel</a>
+                <a href="/admin/questions" class="px-4 py-2 bg-gray-300 text-gray-800 rounded-md hover:bg-gray-400 text-sm">Cancel</a>
                 <button type="submit" class="px-4 py-2 bg-blue-400 text-white font-semibold rounded-lg hover:bg-blue-600">
                     Update Question
                 </button>

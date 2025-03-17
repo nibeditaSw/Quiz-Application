@@ -13,7 +13,7 @@ def admin_page(request: Request, db: Session = Depends(get_db)):
     is_admin = request.cookies.get("is_admin")
     
     if is_admin != "true":
-        return RedirectResponse(url="/auth/login", status_code=303)
+        return RedirectResponse(url="/login", status_code=303)
 
     # questions = db.query(Question).all()  # Fetch all questions
     users = db.query(User).all()  # Fetch all users
@@ -26,7 +26,7 @@ def admin_page(request: Request, db: Session = Depends(get_db)):
 
 @router.post("/admin-logout")
 def logout():
-    response = RedirectResponse(url="/auth/login", status_code=303)
+    response = RedirectResponse(url="/login", status_code=303)
     response.delete_cookie("is_admin")  # Clear session cookie
     return response
 
@@ -37,7 +37,7 @@ def edit_user_page(user_id: int, request: Request, db: Session = Depends(get_db)
     is_admin = request.cookies.get("is_admin")
 
     if is_admin != "true":
-        return RedirectResponse(url="/auth/login", status_code=303)
+        return RedirectResponse(url="/login", status_code=303)
 
     user = db.query(User).filter(User.id == user_id).first()
     if not user:
@@ -51,7 +51,7 @@ def update_user(request: Request, user_id: int, score: int = Form(...), db: Sess
     is_admin = request.cookies.get("is_admin")
 
     if is_admin != "true":
-        return RedirectResponse(url="/auth/login", status_code=303)
+        return RedirectResponse(url="/login", status_code=303)
     
     user = db.query(User).filter(User.id == user_id).first()
     if not user:
@@ -59,7 +59,7 @@ def update_user(request: Request, user_id: int, score: int = Form(...), db: Sess
 
     user.score = score
     db.commit()
-    return RedirectResponse(url="/admin/admin", status_code=303)
+    return RedirectResponse(url="/admin", status_code=303)
 
 # Delete User
 @router.post("/admin/delete/{user_id}")
@@ -67,7 +67,7 @@ def delete_user(request: Request, user_id: int, db: Session = Depends(get_db)):
     is_admin = request.cookies.get("is_admin")
 
     if is_admin != "true":
-        return RedirectResponse(url="/auth/login", status_code=303)
+        return RedirectResponse(url="/login", status_code=303)
 
     user = db.query(User).filter(User.id == user_id).first()
     if not user:
@@ -75,7 +75,7 @@ def delete_user(request: Request, user_id: int, db: Session = Depends(get_db)):
 
     db.delete(user)
     db.commit()
-    return RedirectResponse(url="/admin/admin", status_code=303)
+    return RedirectResponse(url="/admin", status_code=303)
 
 
 # Question List Page
@@ -125,7 +125,7 @@ def create_question(
     is_admin = request.cookies.get("is_admin")
 
     if is_admin != "true":
-        return RedirectResponse(url="/auth/login", status_code=303)
+        return RedirectResponse(url="/login", status_code=303)
     
     options_map = {
         "A": option_a,
@@ -149,7 +149,7 @@ def create_question(
 
     db.add(new_question)
     db.commit()
-    return RedirectResponse(url="/admin/admin/questions", status_code=303)
+    return RedirectResponse(url="/admin/questions", status_code=303)
 
 
 # edit Question(GET)
@@ -197,7 +197,7 @@ def update_question(
     db_question.difficulty = difficulty
 
     db.commit()
-    return RedirectResponse(url="/admin/admin/questions", status_code=303)
+    return RedirectResponse(url="/admin/questions", status_code=303)
 
 # Delete Question
 @router.post("/admin/delete-question/{id}")
@@ -211,4 +211,4 @@ def delete_question(id: int, db: Session = Depends(get_db)):
 
     db.delete(question)
     db.commit()
-    return RedirectResponse(url="/admin/admin/questions", status_code=303)
+    return RedirectResponse(url="/admin/questions", status_code=303)

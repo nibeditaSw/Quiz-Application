@@ -12,10 +12,10 @@
         <p class="text-lg text-gray-600 mt-2">Your Score: <span class="font-bold text-blue-600">{{ score }}</span> / <span class="text-gray-800">{{ total_attempted }}</span></p>
         
         <div class="mt-6 flex flex-col gap-4">
-            <a href="/auth/review-quiz?session_id={{ session_id }}">
+            <a href="/review-quiz?session_id={{ session_id }}">
                 <button class="w-full bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg transition duration-300">🔍 Review Quiz</button>
             </a>
-            <a href="/auth/start-quiz">
+            <a href="/start-quiz">
                 <button class="w-full bg-green-500 hover:bg-green-600 text-white font-semibold py-2 px-4 rounded-lg transition duration-300">🏠 Back to Quiz Start Page</button>
             </a>
         </div>

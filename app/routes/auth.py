@@ -25,19 +25,21 @@ def register_user(request: Request, username: str = Form(...), email: str = Form
     if user:
         return templates.TemplateResponse("register.html", {"request": request, "error": "Username already exists!"})
     create_user(db, UserCreate(username=username, email=email, password=password))
-    return RedirectResponse(url="/auth/login", status_code=303)
+    return RedirectResponse(url="/login", status_code=303)
 
+
+@router.get("/")
 @router.get("/login")
 def login_page(request: Request):
     return templates.TemplateResponse("login.html", {"request": request})
 
-
+@router.post("/")
 @router.post("/login")
 def login_user(request: Request, username: str = Form(...), password: str = Form(...), db: Session = Depends(get_db)):
     # First, check if the user is an admin
     admin = db.query(Admin).filter(Admin.username == username).first()
     if admin and verify_password(password, admin.hashed_password):
-        response = RedirectResponse(url="/admin/admin", status_code=303)
+        response = RedirectResponse(url="/admin", status_code=303)
         response.set_cookie("is_admin", "true", httponly=True, secure=True)
         return response
 
@@ -48,7 +50,7 @@ def login_user(request: Request, username: str = Form(...), password: str = Form
             "login.html", {"request": request, "error": "Invalid credentials"}
         )
 
-    response = RedirectResponse(url="/auth/start-quiz", status_code=303)
+    response = RedirectResponse(url="/start-quiz", status_code=303)
     response.set_cookie("user_id", str(user.id), httponly=True, secure=True)
     return response
 
@@ -57,7 +59,7 @@ def login_user(request: Request, username: str = Form(...), password: str = Form
 def dashboard(request: Request, db: Session = Depends(get_db), category: str = None, difficulty: str = None):
     user = get_current_user(request, db)
     if not user:
-        return RedirectResponse(url="/auth/login", status_code=303)
+        return RedirectResponse(url="/login", status_code=303)
 
     # Check if questions exist in DB; if not, fetch and store them
     if db.query(Question).count() == 0:
@@ -85,7 +87,7 @@ def dashboard(request: Request, db: Session = Depends(get_db), category: str = N
 
 @router.post("/logout")
 def logout():
-    response = RedirectResponse(url="/auth/login", status_code=303)
+    response = RedirectResponse(url="/login", status_code=303)
     response.delete_cookie("user_id")  # Clear session cookie
     return response
 
@@ -94,7 +96,7 @@ def logout():
 async def submit_quiz(request: Request, db: Session = Depends(get_db)):
     user = get_current_user(request, db)
     if not user:
-        return RedirectResponse(url="/auth/login", status_code=303)
+        return RedirectResponse(url="/login", status_code=303)
 
     # Retrieve form data
     form_data = await request.form()
@@ -180,7 +182,7 @@ async def submit_quiz(request: Request, db: Session = Depends(get_db)):
 async def review_quiz(request: Request, session_id: int, db: Session = Depends(get_db)):
     user = get_current_user(request, db)
     if not user:
-        return RedirectResponse(url="/auth/login", status_code=303)
+        return RedirectResponse(url="/login", status_code=303)
 
     # Fetch only the latest session
     latest_attempts = (
@@ -199,7 +201,7 @@ async def review_quiz(request: Request, session_id: int, db: Session = Depends(g
 def start_quiz(request: Request, db: Session = Depends(get_db)):
     user = get_current_user(request, db)
     if not user:
-        return RedirectResponse(url="/auth/login", status_code=303)
+        return RedirectResponse(url="/login", status_code=303)
     
     # Fetch available categories from DB (assuming Question has a category field)
     categories = db.query(Question.category).distinct().all()
@@ -225,7 +227,7 @@ def start_quiz(request: Request, db: Session = Depends(get_db)):
 async def start_quiz_post(request: Request, db: Session = Depends(get_db)):
     user = get_current_user(request, db)
     if not user:
-        return RedirectResponse(url="/auth/login", status_code=303)
+        return RedirectResponse(url="/login", status_code=303)
     
     # Retrieve form data (category and difficulty)
     form_data = await request.form()
@@ -233,4 +235,4 @@ async def start_quiz_post(request: Request, db: Session = Depends(get_db)):
     difficulty = form_data.get("difficulty")
 
     # Redirect to the dashboard with the selected category and difficulty
-    return RedirectResponse(url=f"/auth/dashboard?category={category}&difficulty={difficulty}", status_code=303)
+    return RedirectResponse(url=f"/dashboard?category={category}&difficulty={difficulty}", status_code=303)

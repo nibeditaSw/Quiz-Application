@@ -20,7 +20,7 @@
             <span>🎟 Tokens: <strong>{{ user.token }}</strong></span>
           </div>
 
-          <form action="/auth/logout" method="post">
+          <form action="/logout" method="post">
             <button
               type="submit"
               class="px-5 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-red-400"
@@ -40,7 +40,7 @@
           🎯 Start a Quiz
         </h2>
 
-        <form action="/auth/start-quiz" method="post" class="space-y-6 mt-6">
+        <form action="/start-quiz" method="post" class="space-y-6 mt-6">
           <div>
             <label for="category" class="text-lg font-medium text-gray-800"
               >📚 Select Category</label

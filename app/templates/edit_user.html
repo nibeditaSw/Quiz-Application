@@ -12,10 +12,10 @@
         <div class="max-w-8xl mx-auto flex items-center justify-between">
             <div class="text-white font-semibold text-lg">Admin Panel</div>
             <div class="space-x-4">
-                <a href="/admin/admin" class="text-white hover:text-gray-300">🏠 Home</a>
-                <a href="/admin/admin/questions" class="text-white hover:text-gray-300">📋 Questions</a>
+                <a href="/admin" class="text-white hover:text-gray-300">🏠 Home</a>
+                <a href="/admin/questions" class="text-white hover:text-gray-300">📋 Questions</a>
             </div>
-            <form action="/admin/admin-logout" method="post">
+            <form action="/admin-logout" method="post">
                 <button type="submit" class="px-3 py-1 bg-red-600 text-white rounded-md hover:bg-red-700 text-sm">
                     Logout
                 </button>
@@ -26,7 +26,7 @@
     <div class="max-w-3xl mx-auto bg-white p-8 rounded-xl shadow-lg mt-12">
         <h2 class="text-3xl font-bold text-gray-800 mb-6">Edit User</h2>
 
-        <form action="/admin/admin/edit/{{ user.id }}" method="post">
+        <form action="/admin/edit/{{ user.id }}" method="post">
             <div class="mb-5">
                 <label for="score" class="block text-gray-700 font-medium mb-2">Update Score:</label>
                 <input type="number" id="score" name="score" value="{{ user.score }}"
@@ -34,7 +34,7 @@
             </div>
 
             <div class="flex justify-end space-x-4">
-                <a href="/admin/admin"
+                <a href="/admin"
                     class="px-5 py-2 bg-gray-500 text-white rounded-lg shadow-md hover:bg-gray-600 transition">Cancel</a>
                 <button type="submit"
                     class="px-5 py-2 bg-green-600 text-white rounded-lg shadow-md hover:bg-green-700 transition">Save</button>
