@@ -1,9 +1,20 @@
+import logging
 from fastapi import APIRouter, Depends, HTTPException, Request, Form
-from sqlalchemy.orm import Session
-from app.database import get_db
 from fastapi.responses import RedirectResponse
 from fastapi.templating import Jinja2Templates
+from sqlalchemy.orm import Session
+from app.database import get_db
 from app.models import User, Question, QuizAttempt
+
+# Configure logging
+logging.basicConfig(
+    # filename="admin_quiz.log",
+    # filemode="a",
+    format="{asctime} | {levelname} | {message}",
+    datefmt="%d-%b-%y %H:%M:%S",
+    level=20,
+    style="{"
+)
 
 router = APIRouter()
 templates = Jinja2Templates(directory="app/templates")
@@ -18,6 +29,7 @@ def admin_page(request: Request, db: Session = Depends(get_db)):
     # questions = db.query(Question).all()  # Fetch all questions
     users = db.query(User).all()  # Fetch all users
 
+    logging.info("Admin accessed the Home page.")
     return templates.TemplateResponse("admin.html", {
         "request": request,
         # "questions": questions,
@@ -28,6 +40,7 @@ def admin_page(request: Request, db: Session = Depends(get_db)):
 def logout():
     response = RedirectResponse(url="/login", status_code=303)
     response.delete_cookie("is_admin")  # Clear session cookie
+    logging.info("Admin logged out.")
     return response
 
 
@@ -43,6 +56,7 @@ def edit_user_page(user_id: int, request: Request, db: Session = Depends(get_db)
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
 
+    logging.info(f"Admin accessed edit page for user {user_id}.")
     return templates.TemplateResponse("edit_user.html", {"request": request, "user": user})
 
 # Update User Data 
@@ -59,6 +73,7 @@ def update_user(request: Request, user_id: int, score: int = Form(...), db: Sess
 
     user.score = score
     db.commit()
+    logging.info(f"Admin updated user {user_id}'s score to {score}.")
     return RedirectResponse(url="/admin", status_code=303)
 
 # Delete User
@@ -75,6 +90,7 @@ def delete_user(request: Request, user_id: int, db: Session = Depends(get_db)):
 
     db.delete(user)
     db.commit()
+    logging.info(f"Admin deleted user {user_id}.")
     return RedirectResponse(url="/admin", status_code=303)
 
 
@@ -97,6 +113,7 @@ def admin_questions(request: Request, db: Session = Depends(get_db), search: str
 
     questions = query.all()
 
+    logging.info("Admin accessed the question list.")
     return templates.TemplateResponse(
         "admin_questions.html",
         {"request": request, "questions": questions, "search_query": search}
@@ -106,6 +123,7 @@ def admin_questions(request: Request, db: Session = Depends(get_db), search: str
 # Create Question Page (GET)
 @router.get("/admin/create-question")
 def create_question_page(request: Request):
+    logging.info("Admin accessed create question page.")
     return templates.TemplateResponse("create_question.html", {"request": request})
 
 # Create Question (POST)
@@ -149,6 +167,7 @@ def create_question(
 
     db.add(new_question)
     db.commit()
+    logging.info("Admin created a new question.")
     return RedirectResponse(url="/admin/questions", status_code=303)
 
 
@@ -157,7 +176,9 @@ def create_question(
 def edit_question(request: Request, id: int, db: Session = Depends(get_db)):
     question = db.query(Question).filter(Question.id == id).first()
     if not question:
+        logging.warning(f"Question with ID {id} not found.")
         return {"error": "Question not found"}
+    logging.info(f"Rendering edit_question.html for Question ID {id}")
     return templates.TemplateResponse("edit_question.html", {"request": request, "question": question})
 
 
@@ -177,6 +198,7 @@ def update_question(
 ):
     db_question = db.query(Question).filter(Question.id == id).first()
     if not db_question:
+        logging.warning(f"Question with ID {id} not found for update.")
         return {"error": "Question not found"}
     
     options_map = {
@@ -197,6 +219,7 @@ def update_question(
     db_question.difficulty = difficulty
 
     db.commit()
+    logging.info(f"Updated Question ID {id} and redirecting to /admin/questions")
     return RedirectResponse(url="/admin/questions", status_code=303)
 
 # Delete Question
@@ -204,6 +227,7 @@ def update_question(
 def delete_question(id: int, db: Session = Depends(get_db)):
     question = db.query(Question).filter(Question.id == id).first()
     if not question:
+        logging.warning(f"Question with ID {id} not found for deletion.")
         return {"error": "Question not found"}
     
     # Delete related quiz attempts before deleting the question
@@ -211,4 +235,5 @@ def delete_question(id: int, db: Session = Depends(get_db)):
 
     db.delete(question)
     db.commit()
+    logging.info(f"Deleted Question ID {id} and redirecting to /admin/questions")
     return RedirectResponse(url="/admin/questions", status_code=303)

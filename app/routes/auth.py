@@ -1,14 +1,25 @@
+import logging
 from datetime import datetime
 from fastapi import APIRouter, Depends, Request, Form
+from fastapi.responses import RedirectResponse
+from fastapi.templating import Jinja2Templates
 from sqlalchemy.orm import Session
 from sqlalchemy.sql.expression import func
 from app.database import get_db
-from app.crud import create_user, get_user_by_username
+from app.crud import create_user, get_user_by_username, get_user_login
 from app.utils import verify_password, store_questions_in_db, get_current_user
 from app.schemas import UserCreate
-from fastapi.responses import RedirectResponse
-from fastapi.templating import Jinja2Templates
 from app.models import User, Question, QuizAttempt, Admin, UserQuizStats
+
+# Configure logging
+logging.basicConfig(
+    # filename="user_quiz.log",
+    # filemode="a",
+    format="{asctime} | {levelname} | {message}",
+    datefmt="%d-%b-%y %H:%M:%S",
+    level=20,
+    style="{"
+)
 
 router = APIRouter()
 templates = Jinja2Templates(directory="app/templates")
@@ -16,21 +27,25 @@ templates = Jinja2Templates(directory="app/templates")
 
 @router.get("/register")
 def register_page(request: Request):
+    logging.info("Accessed register page")
     return templates.TemplateResponse("register.html", {"request": request})
 
 
 @router.post("/register")
 def register_user(request: Request, username: str = Form(...), email: str = Form(...), password: str = Form(...), db: Session = Depends(get_db)):
-    user = get_user_by_username(db, username)
+    user = get_user_by_username(db, username, email)
     if user:
-        return templates.TemplateResponse("register.html", {"request": request, "error": "Username already exists!"})
+        logging.warning(f"Registration failed: Username {username} & Email {email} already exists.")
+        return templates.TemplateResponse("register.html", {"request": request, "error": "Username or Email already exists!"})
     create_user(db, UserCreate(username=username, email=email, password=password))
+    logging.info(f"New user registered: {username}")
     return RedirectResponse(url="/login", status_code=303)
 
 
 @router.get("/")
 @router.get("/login")
 def login_page(request: Request):
+    logging.info("Accessed login page")
     return templates.TemplateResponse("login.html", {"request": request})
 
 @router.post("/")
@@ -39,17 +54,20 @@ def login_user(request: Request, username: str = Form(...), password: str = Form
     # First, check if the user is an admin
     admin = db.query(Admin).filter(Admin.username == username).first()
     if admin and verify_password(password, admin.hashed_password):
+        logging.info(f"Admin login successful: {username}")
         response = RedirectResponse(url="/admin", status_code=303)
         response.set_cookie("is_admin", "true", httponly=True, secure=True)
         return response
 
     # Otherwise, check if it's a normal user
-    user = get_user_by_username(db, username)  
+    user = get_user_login(db, username)  
     if not user or not verify_password(password, user.hashed_password):
+        logging.warning(f"Failed login attempt for username: {username}")
         return templates.TemplateResponse(
             "login.html", {"request": request, "error": "Invalid credentials"}
         )
-
+    
+    logging.info(f"User login successful: {username}")
     response = RedirectResponse(url="/start-quiz", status_code=303)
     response.set_cookie("user_id", str(user.id), httponly=True, secure=True)
     return response
@@ -59,8 +77,10 @@ def login_user(request: Request, username: str = Form(...), password: str = Form
 def dashboard(request: Request, db: Session = Depends(get_db), category: str = None, difficulty: str = None):
     user = get_current_user(request, db)
     if not user:
+        logging.warning("Unauthorized access to dashboard")
         return RedirectResponse(url="/login", status_code=303)
 
+    logging.info(f"User {user.username} accessed dashboard")
     # Check if questions exist in DB; if not, fetch and store them
     if db.query(Question).count() == 0:
         store_questions_in_db(db)
@@ -89,6 +109,7 @@ def dashboard(request: Request, db: Session = Depends(get_db), category: str = N
 def logout():
     response = RedirectResponse(url="/login", status_code=303)
     response.delete_cookie("user_id")  # Clear session cookie
+    logging.info("User logged out")
     return response
 
 
@@ -167,6 +188,7 @@ async def submit_quiz(request: Request, db: Session = Depends(get_db)):
 
     total_attempted = len(questions)
 
+    logging.info(f"User {user.username} submitted a quiz - Score: {score}/{len(questions)}")
     return templates.TemplateResponse(
         "result.html",
         {
@@ -191,6 +213,7 @@ async def review_quiz(request: Request, session_id: int, db: Session = Depends(g
         .all()
     )
 
+    logging.info(f"User {user.username} reviewed quiz session {session_id}")
     return templates.TemplateResponse("review.html", {
         "request": request,
         "quiz_attempts": latest_attempts
@@ -213,6 +236,7 @@ def start_quiz(request: Request, db: Session = Depends(get_db)):
     
     user_stats = db.query(UserQuizStats).order_by(UserQuizStats.correct_count.desc()).all()
     
+    logging.info("Rendering quiz start page")
     return templates.TemplateResponse("quiz_start.html", {
         "request": request, 
         "user": user, 
@@ -234,5 +258,6 @@ async def start_quiz_post(request: Request, db: Session = Depends(get_db)):
     category = form_data.get("category")
     difficulty = form_data.get("difficulty")
 
+    logging.info(f"Quiz started with category: {category}, difficulty: {difficulty}")
     # Redirect to the dashboard with the selected category and difficulty
     return RedirectResponse(url=f"/dashboard?category={category}&difficulty={difficulty}", status_code=303)
