@@ -68,19 +68,19 @@ def login_user(request: Request, username: str = Form(...), password: str = Form
         )
     
     logging.info(f"User login successful: {username}")
-    response = RedirectResponse(url="/start-quiz", status_code=303)
+    response = RedirectResponse(url="/home", status_code=303)
     response.set_cookie("user_id", str(user.id), httponly=True, secure=True)
     return response
 
 
-@router.get("/dashboard")
-def dashboard(request: Request, db: Session = Depends(get_db), category: str = None, difficulty: str = None):
+@router.get("/questions")
+def questions(request: Request, db: Session = Depends(get_db), category: str = None, difficulty: str = None):
     user = get_current_user(request, db)
     if not user:
-        logging.warning("Unauthorized access to dashboard")
+        logging.warning("Unauthorized access to questions")
         return RedirectResponse(url="/login", status_code=303)
 
-    logging.info(f"User {user.username} accessed dashboard")
+    logging.info(f"User {user.username} accessed questions")
     # Check if questions exist in DB; if not, fetch and store them
     if db.query(Question).count() == 0:
         store_questions_in_db(db)
@@ -98,7 +98,7 @@ def dashboard(request: Request, db: Session = Depends(get_db), category: str = N
     questions = query.order_by(func.random()).limit(5).all()
 
     # Render the template with the questions
-    return templates.TemplateResponse("dashboard.html", {
+    return templates.TemplateResponse("questions.html", {
         "request": request,
         "user": user,
         "questions": questions
@@ -220,7 +220,7 @@ async def review_quiz(request: Request, session_id: int, db: Session = Depends(g
     })
 
 
-@router.get("/start-quiz")
+@router.get("/home")
 def start_quiz(request: Request, db: Session = Depends(get_db)):
     user = get_current_user(request, db)
     if not user:
@@ -237,7 +237,7 @@ def start_quiz(request: Request, db: Session = Depends(get_db)):
     user_stats = db.query(UserQuizStats).order_by(UserQuizStats.correct_count.desc()).all()
     
     logging.info("Rendering quiz start page")
-    return templates.TemplateResponse("quiz_start.html", {
+    return templates.TemplateResponse("home.html", {
         "request": request, 
         "user": user, 
         "categories": categories,
@@ -247,7 +247,7 @@ def start_quiz(request: Request, db: Session = Depends(get_db)):
     })
 
 
-@router.post("/start-quiz")
+@router.post("/home")
 async def start_quiz_post(request: Request, db: Session = Depends(get_db)):
     user = get_current_user(request, db)
     if not user:
@@ -259,5 +259,5 @@ async def start_quiz_post(request: Request, db: Session = Depends(get_db)):
     difficulty = form_data.get("difficulty")
 
     logging.info(f"Quiz started with category: {category}, difficulty: {difficulty}")
-    # Redirect to the dashboard with the selected category and difficulty
-    return RedirectResponse(url=f"/dashboard?category={category}&difficulty={difficulty}", status_code=303)
+    # Redirect to the questions with the selected category and difficulty
+    return RedirectResponse(url=f"/questions?category={category}&difficulty={difficulty}", status_code=303)
