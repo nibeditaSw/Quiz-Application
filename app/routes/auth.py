@@ -27,12 +27,41 @@ templates = Jinja2Templates(directory="app/templates")
 
 @router.get("/register")
 def register_page(request: Request):
+    """
+    GET /register
+
+    Displays the registration page for the user to input username, email, and password.
+    The page is rendered using the register.html template from the app/templates directory.
+    The request object is passed to the template to access session data, cookies, etc.
+
+    Returns:
+        templates.TemplateResponse: Rendered HTML template for the registration page
+    """
     logging.info("Accessed register page")
     return templates.TemplateResponse("register.html", {"request": request})
 
 
 @router.post("/register")
 def register_user(request: Request, username: str = Form(...), email: str = Form(...), password: str = Form(...), db: Session = Depends(get_db)):
+    """
+    Handles user registration by processing form data submitted via POST request.
+    
+    Args:
+        request (Request): The HTTP request object containing metadata about the request.
+        username (str): The username provided by the user in the registration form.
+        email (str): The email address provided by the user in the registration form.
+        password (str): The password provided by the user in the registration form.
+        db (Session): The database session used for querying and saving user data.
+    
+    Returns:
+        TemplateResponse: Renders the registration page with an error message if registration fails.
+        RedirectResponse: Redirects to the login page upon successful registration.
+    
+    Logs:
+        Warning: If the username or email already exists in the database.
+        Info: When a new user is successfully registered.
+    """
+
     user = get_user_by_username(db, username, email)
     if user:
         logging.warning(f"Registration failed: Username {username} & Email {email} already exists.")
@@ -45,12 +74,42 @@ def register_user(request: Request, username: str = Form(...), email: str = Form
 @router.get("/")
 @router.get("/login")
 def login_page(request: Request):
+    """
+    Handles GET requests to the root URL (/) and the login page (/login), rendering the login.html template.
+
+    Args:
+        request (Request): The HTTP request object containing metadata about the request.
+
+    Returns:
+        TemplateResponse: Renders the login.html template with the request object as context.
+    """
     logging.info("Accessed login page")
     return templates.TemplateResponse("login.html", {"request": request})
 
 @router.post("/")
 @router.post("/login")
 def login_user(request: Request, username: str = Form(...), password: str = Form(...), db: Session = Depends(get_db)):
+    """
+    Handles POST requests to the root URL (/) and the login page (/login), validating
+    the provided username and password and redirecting to either the admin panel or the
+    quiz page based on the user's type.
+
+    Args:
+        request (Request): The HTTP request object containing metadata about the request.
+        username (str): The username provided by the user in the login form.
+        password (str): The password provided by the user in the login form.
+        db (Session): The database session used for querying and verifying user data.
+
+    Returns:
+        TemplateResponse: Renders the login.html template with an error message if the
+            credentials are invalid.
+        RedirectResponse: Redirects to the admin panel (/admin) if the user is an admin,
+            or to the quiz page (/home) if the user is a normal user.
+
+    Logs:
+        Info: When an admin or user logs in successfully.
+        Warning: When a login attempt fails.
+    """
     # First, check if the user is an admin
     admin = db.query(Admin).filter(Admin.username == username).first()
     if admin and verify_password(password, admin.hashed_password):
@@ -75,6 +134,25 @@ def login_user(request: Request, username: str = Form(...), password: str = Form
 
 @router.get("/questions")
 def questions(request: Request, db: Session = Depends(get_db), category: str = None, difficulty: str = None):
+    """
+    Handles GET requests to the /questions route, fetching and rendering a set of
+    questions based on the provided category and difficulty filters.
+
+    Args:
+        request (Request): The HTTP request object containing metadata about the request.
+        db (Session): The database session used for querying and storing questions.
+        category (str): The category to filter questions by (optional).
+        difficulty (str): The difficulty to filter questions by (optional).
+
+    Returns:
+        TemplateResponse: Renders the questions.html template with the request object and
+            a list of questions as context.
+
+    Logs:
+        Warning: When an unauthorized user attempts to access the questions.
+        Info: When a user successfully accesses the questions.
+    """
+    
     user = get_current_user(request, db)
     if not user:
         logging.warning("Unauthorized access to questions")
@@ -107,6 +185,16 @@ def questions(request: Request, db: Session = Depends(get_db), category: str = N
 
 @router.post("/logout")
 def logout():
+    """
+    Handles POST requests to the logout endpoint, clearing the session cookie and redirecting
+    the user to the login page.
+
+    Returns:
+        RedirectResponse: Redirects to the login page and clears the session cookie.
+
+    Logs:
+        Info: When a user logs out.
+    """
     response = RedirectResponse(url="/login", status_code=303)
     response.delete_cookie("user_id")  # Clear session cookie
     logging.info("User logged out")
@@ -115,6 +203,21 @@ def logout():
 
 @router.post("/submit-quiz")
 async def submit_quiz(request: Request, db: Session = Depends(get_db)):
+    """
+    Handles POST requests to the /submit-quiz route, extracting form data, validating
+    answers, updating user scores and statistics, and rendering the result page.
+
+    Args:
+        request (Request): The HTTP request object containing metadata about the request.
+        db (Session): The database session used for querying and storing questions and user data.
+
+    Returns:
+        TemplateResponse: Renders the result.html template with the request object, score, and
+            total attempted questions as context.
+
+    Logs:
+        Info: When a user submits a quiz and receives a score.
+    """
     user = get_current_user(request, db)
     if not user:
         return RedirectResponse(url="/login", status_code=303)
@@ -202,6 +305,22 @@ async def submit_quiz(request: Request, db: Session = Depends(get_db)):
 
 @router.get("/review-quiz")
 async def review_quiz(request: Request, session_id: int, db: Session = Depends(get_db)):
+    """
+    Handles GET requests to the /review-quiz route, displaying the latest quiz
+    submission's results.
+
+    Args:
+        request (Request): The HTTP request object containing metadata about the request.
+        session_id (int): The session ID of the quiz submission to review.
+        db (Session): The database session used for querying the user's attempts.
+
+    Returns:
+        TemplateResponse: Renders the review.html template with the request object and
+            the latest quiz attempts as context.
+
+    Logs:
+        Info: When a user reviews a quiz session.
+    """
     user = get_current_user(request, db)
     if not user:
         return RedirectResponse(url="/login", status_code=303)
@@ -222,6 +341,22 @@ async def review_quiz(request: Request, session_id: int, db: Session = Depends(g
 
 @router.get("/home")
 def start_quiz(request: Request, db: Session = Depends(get_db)):
+    """
+    Handles GET requests to the /home route, displaying the quiz start page with
+    available categories, difficulty levels, top users, and the current user's stats.
+
+    Args:
+        request (Request): The HTTP request object containing metadata about the request.
+        db (Session): The database session used for querying the user's stats and fetching
+            available categories and difficulty levels.
+
+    Returns:
+        TemplateResponse: Renders the home.html template with the request object, user,
+            categories, difficulties, top users, and user stats as context.
+
+    Logs:
+        Info: When the quiz start page is rendered.
+    """
     user = get_current_user(request, db)
     if not user:
         return RedirectResponse(url="/login", status_code=303)
@@ -249,6 +384,23 @@ def start_quiz(request: Request, db: Session = Depends(get_db)):
 
 @router.post("/home")
 async def start_quiz_post(request: Request, db: Session = Depends(get_db)):
+    """
+    Handles POST requests to the /home route, extracting form data (category and difficulty),
+    checking for valid user authentication, logging the quiz start event, and redirecting to
+    the questions page with the selected category and difficulty.
+
+    Args:
+        request (Request): The HTTP request object containing metadata about the request.
+        db (Session): The database session used for querying the user's stats and fetching
+            available categories and difficulty levels.
+
+    Returns:
+        RedirectResponse: Redirects to the questions page with the selected category and
+            difficulty.
+
+    Logs:
+        Info: When a user starts a new quiz.
+    """
     user = get_current_user(request, db)
     if not user:
         return RedirectResponse(url="/login", status_code=303)
