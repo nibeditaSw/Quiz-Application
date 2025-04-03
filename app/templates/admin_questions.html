@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz Application</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 font-sans antialiased">
+
+    <!-- Navigation Bar -->
+    <nav class="bg-blue-500 p-4 shadow-md">
+        <div class="max-w-8xl mx-auto flex items-center justify-between">
+            <div class="text-white font-semibold text-lg">
+                Admin Panel
+            </div>
+            <div class="space-x-4">
+                <a href="/admin" class="text-white hover:text-gray-300">🏠Home</a>
+                <a href="/admin/questions" class="text-white hover:text-gray-300">📋All Questions</a>
+            </div>
+            <form action="/admin-logout" method="post">
+                <button type="submit" class="px-3 py-1 bg-red-600 text-white rounded-md hover:bg-red-700 text-sm">Logout</button>
+            </form>
+        </div>
+    </nav>
+
+    <!-- Page Content -->
+    <div class="max-w-6xl mx-auto mt-10 p-8 bg-white shadow-lg rounded-lg">
+      
+        <h2 class="text-2xl mb-6 font-bold  text-gray-800">📋 Questions List</h2>
+      <!-- Search Bar -->
+      <div class="flex justify-between items-center mb-3 ">
+        <form action="/admin/questions" method="get" class="flex space-x-2 ">
+          <input 
+            type="text" 
+            name="search" 
+            placeholder="Search questions, ID, category, difficulty..." 
+            class="px-3 py-2 border rounded-md focus:outline-none focus:ring focus:ring-blue-300 text-sm w-96"
+            value="{{ search_query if search_query else '' }}"
+          />
+          <button type="submit" class="px-4 py-2 bg-blue-400 text-white rounded-md hover:bg-blue-600 text-sm transition">
+            🔍 Search
+          </button>
+          <a href="/admin/questions" class="px-4 py-2 bg-gray-400 text-white rounded-md hover:bg-gray-500 text-sm transition">
+            ❌ Clear
+          </a>
+        </form>
+        <a href="/admin/create-question" class="px-6 py-2 bg-green-500 text-white text-sm font-medium rounded-md shadow hover:bg-green-600 transition">
+            ➕ Create New Question
+        </a>
+      </div>
+
+      <!-- Questions Table -->
+      <div class="overflow-x-auto rounded-lg shadow">
+        <table class="w-full bg-white border border-gray-200 rounded-lg">
+          <thead class="bg-gray-100 text-gray-700 text-sm uppercase">
+            <tr>
+              <th class="px-5 py-3 text-left">ID</th>
+              <th class="px-5 py-3 text-left">Question</th>
+              <th class="px-5 py-3 text-left">Category</th>
+              <th class="px-5 py-3 text-left">Difficulty</th>
+              <th class="px-5 py-3 text-left">Correct Answer</th>
+              <th class="px-5 py-3 text-center">Actions</th>
+            </tr>
+          </thead>
+          <tbody class="text-sm divide-y divide-gray-200">
+            {% for question in questions %}
+            <tr class="hover:bg-gray-50 transition">
+              <td class="px-5 py-4 font-medium text-gray-700">
+                {{ question.id }}
+              </td>
+              <td class="px-5 py-4 truncate max-w-xs">
+                {{ question.question_text }}
+              </td>
+              <td class="px-5 py-4 text-gray-600">{{ question.category }}</td>
+              <td class="px-5 py-4">
+                <span class="px-3 py-1 rounded-full text-white text-xs font-semibold 
+                  {% if question.difficulty == 'easy' %} bg-green-500 
+                  {% elif question.difficulty == 'medium' %} bg-yellow-500 
+                  {% else %} bg-red-500 {% endif %}">
+                  {{ question.difficulty | capitalize }}
+                </span>
+              </td>
+              <td class="px-5 py-4 text-gray-800 font-semibold">
+                {{ question.correct_option }}
+              </td>
+              <td class="px-5 py-4 text-center">
+                <div class="flex space-x-2 justify-center">
+                  <a href="/admin/edit-question/{{ question.id }}" class="px-3 py-1 bg-blue-400 text-white text-xs rounded-md shadow flex items-center space-x-1 hover:bg-blue-600 transition">
+                    <span>Edit</span>
+                  </a>
+                  <form action="/admin/delete-question/{{ question.id }}" method="post">
+                    <button type="submit" class="px-3 py-1 bg-red-500 text-white text-xs rounded-md shadow flex items-center space-x-1 hover:bg-red-600 transition">
+                      <span>Delete</span>
+                    </button>
+                  </form>
+                </div>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+    
+
+</body>
+</html>
